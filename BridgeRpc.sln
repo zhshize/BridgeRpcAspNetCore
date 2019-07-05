@@ -1,0 +1,58 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BridgeRpc.Core", "src\BridgeRpc.Core\BridgeRpc.Core.csproj", "{C0F11113-10C1-4093-8CE9-9FCD95CB29C7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BridgeRpc.AspNetCore.Router", "src\BridgeRpc.AspNetCore.Router\BridgeRpc.AspNetCore.Router.csproj", "{BA73C9F5-05B1-42A4-9063-CB9C0B5F0E8D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BridgeRpc.AspNetCore.Server", "src\BridgeRpc.AspNetCore.Server\BridgeRpc.AspNetCore.Server.csproj", "{69DABDA0-D6CD-4BFB-924E-C308A38895E1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BridgeRpc.AspNetCore.Client", "src\BridgeRpc.AspNetCore.Client\BridgeRpc.AspNetCore.Client.csproj", "{AB6AC276-C58B-4899-8A23-E9E64625034F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{94475820-5D4C-482E-AC8E-F083732AB95C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "example", "example", "{20813FD7-49E5-42D0-BCC4-AD77AFFDD730}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "example\Client\Client.csproj", "{D343F11A-29EB-4D2E-8C9D-EAD3A7EB7517}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server", "example\Server\Server.csproj", "{E7E7C70C-1222-4416-9139-BAB843232C16}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C0F11113-10C1-4093-8CE9-9FCD95CB29C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0F11113-10C1-4093-8CE9-9FCD95CB29C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0F11113-10C1-4093-8CE9-9FCD95CB29C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0F11113-10C1-4093-8CE9-9FCD95CB29C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA73C9F5-05B1-42A4-9063-CB9C0B5F0E8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA73C9F5-05B1-42A4-9063-CB9C0B5F0E8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA73C9F5-05B1-42A4-9063-CB9C0B5F0E8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA73C9F5-05B1-42A4-9063-CB9C0B5F0E8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69DABDA0-D6CD-4BFB-924E-C308A38895E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69DABDA0-D6CD-4BFB-924E-C308A38895E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69DABDA0-D6CD-4BFB-924E-C308A38895E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69DABDA0-D6CD-4BFB-924E-C308A38895E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB6AC276-C58B-4899-8A23-E9E64625034F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB6AC276-C58B-4899-8A23-E9E64625034F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB6AC276-C58B-4899-8A23-E9E64625034F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB6AC276-C58B-4899-8A23-E9E64625034F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D343F11A-29EB-4D2E-8C9D-EAD3A7EB7517}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D343F11A-29EB-4D2E-8C9D-EAD3A7EB7517}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D343F11A-29EB-4D2E-8C9D-EAD3A7EB7517}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D343F11A-29EB-4D2E-8C9D-EAD3A7EB7517}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7E7C70C-1222-4416-9139-BAB843232C16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7E7C70C-1222-4416-9139-BAB843232C16}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7E7C70C-1222-4416-9139-BAB843232C16}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7E7C70C-1222-4416-9139-BAB843232C16}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AB6AC276-C58B-4899-8A23-E9E64625034F} = {94475820-5D4C-482E-AC8E-F083732AB95C}
+		{BA73C9F5-05B1-42A4-9063-CB9C0B5F0E8D} = {94475820-5D4C-482E-AC8E-F083732AB95C}
+		{69DABDA0-D6CD-4BFB-924E-C308A38895E1} = {94475820-5D4C-482E-AC8E-F083732AB95C}
+		{C0F11113-10C1-4093-8CE9-9FCD95CB29C7} = {94475820-5D4C-482E-AC8E-F083732AB95C}
+		{D343F11A-29EB-4D2E-8C9D-EAD3A7EB7517} = {20813FD7-49E5-42D0-BCC4-AD77AFFDD730}
+		{E7E7C70C-1222-4416-9139-BAB843232C16} = {20813FD7-49E5-42D0-BCC4-AD77AFFDD730}
+	EndGlobalSection
+EndGlobal
