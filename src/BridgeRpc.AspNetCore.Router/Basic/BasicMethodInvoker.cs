@@ -16,22 +16,22 @@ namespace BridgeRpc.AspNetCore.Router.Basic
         public BasicMethodInvoker(RpcOptions options)
         {
             _options = options;
-            SerializeMethod = typeof(MessagePackSerializer)
+            /*SerializeMethod = typeof(MessagePackSerializer)
                 .GetMethods()
                 .First(m => m.Name == nameof(MessagePackSerializer.Serialize) &&
                             m.IsGenericMethod &&
-                            m.GetParameters().Length == 1);
+                            m.GetParameters().Length == 1);*/
         }
 
-        public RpcResponse Call(IRpcMethod method, RpcRequest request)
+        public RpcResponse Call(IRpcMethod method, ref IRpcActionContext context)
         {
-            var args = GetArguments(method, request);
+            var args = GetArguments(method, context.Request);
+            method.Controller.RpcContext = context;
             if (IsAsyncMethod(method))
             {
                 if (method.Prototype.ReturnType == typeof(Task<RpcResponse>))
                 {
                     // for async Task<RpcResponse>
-                    Console.WriteLine("async Task<RpcResponse>");
                     var t = (Task<RpcResponse>) method.Prototype.Invoke(method.Controller, args);
                     var success = t.Wait(_options.RequestTimeout);
 
@@ -48,12 +48,12 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                     var t = (dynamic) method.Prototype.Invoke(method.Controller, args);
                     var success = (bool) t.Wait(_options.RequestTimeout);
 
-                    var serializer = SerializeMethod.MakeGenericMethod(finalType);
+                    //var serializer = SerializeMethod.MakeGenericMethod(finalType);
 
-                    var binary = (byte[]) serializer.Invoke(this, new [] {t.Result});
+                    //var binary = (byte[]) serializer.Invoke(this, new [] {t.Result});
                     var res = new RpcResponse
                     {
-                        Result = binary
+                        Result = t.Result
                     };
 
                     if (success) return res;
@@ -69,26 +69,31 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                     // for RpcResponse
                     return (RpcResponse) method.Prototype.Invoke(method.Controller, args);
                 }
+                else if (method.Prototype.ReturnType == typeof(void))
+                {
+                    return context.Response;
+                }
                 else
                 {
                     // for any
                     var finalType = method.Prototype.ReturnType;
                     var t = method.Prototype.Invoke(method.Controller, args);
 
-                    var serializer = SerializeMethod.MakeGenericMethod(finalType);
+                    //var serializer = SerializeMethod.MakeGenericMethod(finalType);
 
-                    var binary = (byte[]) serializer.Invoke(this, new [] {t});
+                    //var binary = (byte[]) serializer.Invoke(this, new [] {t});
                     return new RpcResponse
                     {
-                        Result = binary
+                        Result = t
                     };
                 }
             }
         }
 
-        public void Notify(IRpcMethod method, RpcRequest request)
+        public void Notify(IRpcMethod method, ref IRpcActionContext context)
         {
-            var args = GetArguments(method, request);
+            var args = GetArguments(method, context.Request);
+            method.Controller.RpcContext = context;
             method.Prototype.Invoke(method.Controller, args);
         }
 
@@ -139,6 +144,6 @@ namespace BridgeRpc.AspNetCore.Router.Basic
             return attrib != null;
         }
 
-        protected MethodInfo SerializeMethod { get; }
+        //protected MethodInfo SerializeMethod { get; }
     }
 }

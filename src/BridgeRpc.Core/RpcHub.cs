@@ -19,17 +19,17 @@ namespace BridgeRpc
 
         public event RequestHandler OnRequest;
 
-        public Task<RpcResponse> RequestAsync(string method, byte[] data)
+        public Task<RpcResponse> RequestAsync(string method, object data)
         {
             return RequestAsync(method, data, false, null);
         }
 
-        public Task<RpcResponse> RequestAsync(string method, byte[] data, TimeSpan timeout)
+        public Task<RpcResponse> RequestAsync(string method, object data, TimeSpan timeout)
         {
             return RequestAsync(method, data, true, timeout);
         }
 
-        protected Task<RpcResponse> RequestAsync(string method, byte[] data, bool hasTimeout, TimeSpan? timeout)
+        protected Task<RpcResponse> RequestAsync(string method, object data, bool hasTimeout, TimeSpan? timeout)
         {
             var id = Util.Util.RandomString(16);
             var request = new RpcRequest
@@ -45,12 +45,14 @@ namespace BridgeRpc
             _socket.Send(request.ToBinary());
 
             if (hasTimeout && timeout != null)
-                Task.Run(() => Task.Delay(timeout.Value).ContinueWith(_ => taskSource.TrySetCanceled()));
+                Task.Run(() => 
+                        Task.Delay(timeout.Value)
+                        .ContinueWith(_ => taskSource.TrySetCanceled()));
 
             return task;
         }
 
-        public void Notify(string method, byte[] data)
+        public void Notify(string method, object data)
         {
             var request = new RpcRequest
             {

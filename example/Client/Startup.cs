@@ -24,17 +24,7 @@ namespace Client
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             
-            services.AddBridgeRpcClient((ref RpcClientOptions options) =>
-            {
-                options.Host = new Uri("ws://localhost/");
-                options.ClientId = "client1";
-                options.ReconnectInterval = TimeSpan.FromSeconds(60);
-                
-                options.RpcOptions.AllowedOrigins = new List<string> {"*"};
-                options.RpcOptions.BufferSize = 16 * 1024;
-                options.RpcOptions.KeepAliveInterval = TimeSpan.FromSeconds(120);
-                options.RpcOptions.RequestTimeout = TimeSpan.FromSeconds(15);
-            });
+            services.AddBridgeRpcClient();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

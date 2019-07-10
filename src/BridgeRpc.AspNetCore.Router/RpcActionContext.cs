@@ -1,13 +1,21 @@
 using BridgeRpc.Abstraction;
+using BridgeRpc.AspNetCore.Router.Abstraction;
 using Microsoft.AspNetCore.Http;
 
 namespace BridgeRpc.AspNetCore.Router
 {
-    public class RpcActionContext
+    /// <summary>
+    /// Context in a RPC calling.
+    /// </summary>
+    public class RpcActionContext : IRpcActionContext
     {
-        public IRpcHub Hub { get; protected set; }
-        public RpcRequest Request { get; protected set; }
+        public IRpcHub Hub { get; set; }
+        public RpcRequest Request { get; set; }
         public RpcResponse Response { get; set; }
-        public HttpContext HttpContext { get; protected set; }
+
+        public void Respond(RpcResponse response)
+        {
+            Response = response;
+        }
     }
 }

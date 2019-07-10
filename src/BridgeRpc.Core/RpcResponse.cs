@@ -1,4 +1,5 @@
 using MessagePack;
+using MessagePack.Formatters;
 using MessagePack.Resolvers;
 
 namespace BridgeRpc
@@ -11,8 +12,9 @@ namespace BridgeRpc
         [Key("id")]
         public string Id { get; set; }
         
+        [MessagePackFormatter(typeof(TypelessFormatter))]
         [Key("result")]
-        public byte[] Result { get; set; }
+        public object Result { get; set; }
         [Key("error")]
         public RpcError Error { get; set; }
         
@@ -23,15 +25,18 @@ namespace BridgeRpc
         
         public object GetParameterFromResult(string name)
         {
-            var dynamicModel = 
+            /*var dynamicModel = 
                 MessagePackSerializer.Deserialize<dynamic>(Result, ContractlessStandardResolver.Instance);
 
-            return dynamicModel[name];
+            return dynamicModel[name];*/
+            dynamic result = Result;
+            return result[name];
         }
         
         public T GetResult<T>()
         {
-            return MessagePackSerializer.Deserialize<T>(Result);
+            //return MessagePackSerializer.Deserialize<T>(Result);
+            return (T) Result;
         }
     }
 }

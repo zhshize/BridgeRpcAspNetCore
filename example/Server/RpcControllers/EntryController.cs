@@ -8,7 +8,9 @@ using MessagePack;
 
 namespace Server.RpcControllers
 {
-    [RpcRoute("/go")]
+    [RpcRoute]
+    [TestingFilter("before action filter: 1 at EntryController")]
+    [TestingFilter("before action filter: 2 at EntryController")]
     public class EntryController : RpcController
     {
         private readonly IRpcHub _rpcHub;
@@ -18,19 +20,29 @@ namespace Server.RpcControllers
             _rpcHub = rpcHub;
         }
 
+
         [RpcMethod("greet")]
+        [TestingFilter("before action filter: 3 at Method")]
+        [TestingFilter("before action filter: 4 at Method")]
         public async Task<string> Greet(RpcRequest request)
         {
             var friend = request.GetData<string>();
-            
+
             Console.WriteLine("Got greet from " + friend);
 
-            var data = new Dictionary<string, string>();
-            data.Add("name", "amy");
+            /*try
+            {
+                var data = new Dictionary<string, string> {{"name", "amy"}};
 
-            RpcResponse reqTask = await _rpcHub.RequestAsync("sayHi",
-                MessagePackSerializer.Serialize(data));
-            Console.WriteLine("Amy says Hi, got reply, he says " + reqTask.GetResult<string>());
+                RpcResponse reqTask = await _rpcHub.RequestAsync("sayHi", data, TimeSpan.FromSeconds(3));
+
+                Console.WriteLine("Amy says Hi, got reply, he says " + reqTask.GetResult<string>());
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }*/
+
 
             return "Greeted";
         }

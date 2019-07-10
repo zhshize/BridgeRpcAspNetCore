@@ -1,4 +1,5 @@
 using MessagePack;
+using MessagePack.Formatters;
 using MessagePack.Resolvers;
 
 namespace BridgeRpc
@@ -13,8 +14,10 @@ namespace BridgeRpc
         
         [Key("method")]
         public string Method { get; set; }
+        
+        [MessagePackFormatter(typeof(TypelessFormatter))]
         [Key("data")]
-        public byte[] Data { get; set; }
+        public object Data { get; set; }
 
         public byte[] ToBinary()
         {
@@ -28,15 +31,13 @@ namespace BridgeRpc
         
         public object GetParameterFromData(string name)
         {
-            var dynamicModel = 
-                MessagePackSerializer.Deserialize<dynamic>(Data, ContractlessStandardResolver.Instance);
-
-            return dynamicModel[name];
+            dynamic data = Data;
+            return data[name];
         }
         
         public T GetData<T>()
         {
-            return MessagePackSerializer.Deserialize<T>(Data);
+            return (T) Data;
         }
     }
 }

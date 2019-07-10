@@ -7,14 +7,21 @@ namespace BridgeRpc.AspNetCore.Client
     public class RpcIndependentScopeClient
     {
         private readonly IServiceScope _scope;
+        public RpcClientOptions Options { get; set; }
 
         public RpcIndependentScopeClient(IServiceScope scope)
         {
             _scope = scope;
         }
         
+        public RpcIndependentScopeClient(IServiceScope scope, RpcClientOptions options)
+        {
+            _scope = scope;
+            Options = options;
+        }
+        
         public event Action<IRpcHub, IServiceProvider> OnConnected;
-        public event Action OnDisonnected;
+        public event Action OnDisconnected;
         public event Action<Exception> OnConnectFailed;
 
         public void Start()
@@ -22,8 +29,9 @@ namespace BridgeRpc.AspNetCore.Client
             var services = _scope.ServiceProvider;
             
             var connection = services.GetRequiredService<Connection>();
+            if (Options != null) connection.Options = Options;
             connection.OnConnected += (hub, provider) => OnConnected?.Invoke(hub, provider);
-            connection.OnDisonnected += () => OnDisonnected?.Invoke();
+            connection.OnDisonnected += () => OnDisconnected?.Invoke();
             connection.OnConnectFailed += e => OnConnectFailed?.Invoke(e);
             connection.Run();
         }

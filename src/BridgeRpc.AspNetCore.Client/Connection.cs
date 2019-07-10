@@ -12,12 +12,12 @@ namespace BridgeRpc.AspNetCore.Client
     public class Connection
     {
         private readonly IServiceScopeFactory _scopeFactory;
-        private readonly RpcClientOptions _options;
+        public RpcClientOptions Options { get; set; }
 
         public Connection(IServiceScopeFactory scopeFactory, RpcClientOptions options)
         {
             _scopeFactory = scopeFactory;
-            _options = options;
+            Options = options;
         }
 
         public event Action<IRpcHub, IServiceProvider> OnConnected;
@@ -35,13 +35,13 @@ namespace BridgeRpc.AspNetCore.Client
                     {
                         using (var scope = _scopeFactory.CreateScope())
                         {
-                            var socket = new BasicSocket(_options.RpcOptions);
+                            var socket = new BasicSocket(Options.RpcOptions);
                             socket.SetSocket(client);
                             scope.ServiceProvider.GetService<SocketProvider>().Socket = socket;
                             try
                             {
                                 var router = scope.ServiceProvider.GetService<BasicRouter>();
-                                router.ClientId = _options.ClientId;
+                                router.ClientId = Options.ClientId;
                                 var handler = scope.ServiceProvider.GetService<IRpcHub>();
                                 // TODO: socket initialize
 #pragma warning disable 4014
@@ -61,8 +61,8 @@ namespace BridgeRpc.AspNetCore.Client
                         OnDisonnected?.Invoke();
                     }
 
-                    if (_options.ReconnectInterval.HasValue)
-                        await Task.Delay(_options.ReconnectInterval.Value);
+                    if (Options.ReconnectInterval.HasValue)
+                        await Task.Delay(Options.ReconnectInterval.Value);
                 }
             });
         }
@@ -72,7 +72,7 @@ namespace BridgeRpc.AspNetCore.Client
             var client = new ClientWebSocket();
             try
             {
-                client.ConnectAsync(_options.Host, CancellationToken.None).Wait();
+                client.ConnectAsync(Options.Host, CancellationToken.None).Wait();
             }
             catch (Exception e)
             {

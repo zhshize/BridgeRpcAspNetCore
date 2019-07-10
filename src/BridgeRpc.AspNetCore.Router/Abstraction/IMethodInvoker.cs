@@ -6,15 +6,15 @@ namespace BridgeRpc.AspNetCore.Router.Abstraction
         /// Try matching parameter and invoke method by request.
         /// </summary>
         /// <param name="method"></param>
-        /// <param name="request"></param>
+        /// <param name="context"></param>
         /// <returns></returns>
-        RpcResponse Call(IRpcMethod method, RpcRequest request);
+        RpcResponse Call(IRpcMethod method, ref IRpcActionContext context);
 
         /// <summary>
         /// Try matching parameter and invoke method by notification request.
         /// </summary>
         /// <param name="method"></param>
-        /// <param name="request">Notification request.</param>
-        void Notify(IRpcMethod method, RpcRequest request);
+        /// <param name="context"></param>
+        void Notify(IRpcMethod method, ref IRpcActionContext context);
     }
 }

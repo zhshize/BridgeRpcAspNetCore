@@ -4,19 +4,21 @@ using System.Linq;
 using System.Reflection;
 using BridgeRpc.Abstraction;
 using BridgeRpc.AspNetCore.Router.Abstraction;
+using BridgeRpc.AspNetCore.Router.Pipeline;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BridgeRpc.AspNetCore.Router.Basic
 {
     public class BasicRouter
     {
         public BasicRouter(IServiceProvider serviceProvider, IRpcHub hub, IRpcMethodProvider methodProvider,
-            IMethodInvoker methodInvoker, IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor, IPipeline pipeline)
         {
             _serviceProvider = serviceProvider;
             _hub = hub;
             _methodProvider = methodProvider;
-            _methodInvoker = methodInvoker;
+            _pipeline = pipeline;
 
             try
             {
@@ -38,7 +40,7 @@ namespace BridgeRpc.AspNetCore.Router.Basic
         private readonly IServiceProvider _serviceProvider;
         private readonly IRpcHub _hub;
         private readonly IRpcMethodProvider _methodProvider;
-        private readonly IMethodInvoker _methodInvoker;
+        private readonly IPipeline _pipeline;
         private readonly List<IRpcMethod> _methods;
         private string _clientId;
 
@@ -62,6 +64,16 @@ namespace BridgeRpc.AspNetCore.Router.Basic
         /// <returns></returns>
         public RpcResponse Handle(RpcRequest request)
         {
+            IRpcActionContext context = new RpcActionContext
+            {
+                Hub = _hub,
+                Request = request,
+                Response = new RpcResponse
+                {
+                    Id = request.Id
+                }
+            };
+
             var methodName = request.Method;
             var methods = _methods.Where(m => GetMethodName(m.Prototype) == methodName);
 
@@ -80,29 +92,21 @@ namespace BridgeRpc.AspNetCore.Router.Basic
             {
                 foreach (var method in methods)
                 {
-                    _methodInvoker.Notify(method, request);
+                    _pipeline.ProcessRequestAsync(method, context).Wait();
+                    //_methodInvoker.Notify(method, ref context);
                 }
 
                 return null;
             }
             else
             {
-                RpcResponse res = null;
+                var method = methods.FirstOrDefault();
+                if (method == null) return context.Response;
+                
+                _pipeline.ProcessRequestAsync(method, context).Wait();
+                //var res = _methodInvoker.Call(method, ref context);
 
-                foreach (var method in methods)
-                {
-                    res = _methodInvoker.Call(method, request);
-                    if (res != null) break;
-                }
-
-                if (res == null)
-                    return new RpcResponse
-                    {
-                        Id = request.Id
-                    };
-
-
-                return res;
+                return context.Response;
             }
         }
 

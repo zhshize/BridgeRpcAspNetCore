@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using BridgeRpc.Abstraction;
 using BridgeRpc.AspNetCore.Router;
@@ -28,7 +29,6 @@ namespace BridgeRpc.AspNetCore.Server.Extensions
 
             app.Use(async (context, next) =>
             {
-                
                 if (context.WebSockets.IsWebSocketRequest)
                 {
                     var logger = context.RequestServices.GetService<ILogger>();

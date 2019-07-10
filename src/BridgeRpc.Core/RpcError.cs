@@ -1,4 +1,5 @@
 using MessagePack;
+using MessagePack.Formatters;
 
 namespace BridgeRpc
 {
@@ -9,10 +10,12 @@ namespace BridgeRpc
         public int Code { get; set; }
         [Key("message")]
         public string Message { get; set; }
+        
+        [MessagePackFormatter(typeof(TypelessFormatter))]
         [Key("data")]
-        public byte[] Data { get; set; }
+        public object Data { get; set; }
 
-        public RpcError(int code, string message, byte[] data)
+        public RpcError(int code, string message, object data)
         {
             Code = code;
             Message = message;

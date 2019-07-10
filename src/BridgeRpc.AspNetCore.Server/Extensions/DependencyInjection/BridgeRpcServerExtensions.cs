@@ -4,6 +4,7 @@ using BridgeRpc.Abstraction;
 using BridgeRpc.AspNetCore.Router;
 using BridgeRpc.AspNetCore.Router.Abstraction;
 using BridgeRpc.AspNetCore.Router.Basic;
+using BridgeRpc.AspNetCore.Router.Pipeline;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -38,6 +39,8 @@ namespace BridgeRpc.AspNetCore.Server.Extensions.DependencyInjection
             services.AddScoped<RoutingOptions>(provider => o.RoutingOptions);
             
             services.AddScoped<ISocket, BasicSocket>();
+            services.AddScoped<GlobalFiltersList>();
+            services.AddScoped<IPipeline, Pipeline>();
             services.AddScoped<IRpcHub, RpcHub>();
             services.AddScoped<BasicRouter>();
             services.AddScoped<IMethodInvoker, BasicMethodInvoker>();

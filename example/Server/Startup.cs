@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using BridgeRpc;
 using BridgeRpc.AspNetCore.Router;
 using BridgeRpc.AspNetCore.Server;
 using BridgeRpc.AspNetCore.Server.Extensions;
 using BridgeRpc.AspNetCore.Server.Extensions.DependencyInjection;
+using MessagePack;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -24,9 +26,11 @@ namespace Server
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            
             services.AddBridgeRpc((ref RpcServerOptions options) =>
             {
-                options.RoutingOptions.AllowAny = false;
+                options.RoutingOptions.AllowAny = true;
                 options.RoutingOptions.AllowedPaths = new List<RoutingPath>();
                 
                 options.RpcOptions.AllowedOrigins = new List<string> {"*"};
@@ -53,6 +57,7 @@ namespace Server
                 bus.OnConnected += (context, hub) =>
                 {
                     Console.WriteLine("Connected");
+                    hub.Notify("notify", MessagePackSerializer.Serialize("hi"));
                 };
                 bus.OnNotAllowed += context => Console.WriteLine("Server not allowed this path: " + context.Request.Path);
                 bus.OnDisconnected += _ => Console.WriteLine("Disconnected");
