@@ -30,18 +30,18 @@ namespace Server.RpcControllers
 
             Console.WriteLine("Got greet from " + friend);
 
-            /*try
+            try
             {
                 var data = new Dictionary<string, string> {{"name", "amy"}};
 
-                RpcResponse reqTask = await _rpcHub.RequestAsync("sayHi", data, TimeSpan.FromSeconds(3));
+                RpcResponse reqTask = await _rpcHub.RequestAsync("sayHi", data);
 
                 Console.WriteLine("Amy says Hi, got reply, he says " + reqTask.GetResult<string>());
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-            }*/
+            }
 
 
             return "Greeted";

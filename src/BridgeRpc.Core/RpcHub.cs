@@ -75,16 +75,20 @@ namespace BridgeRpc
         {
             Task.Run(() => // prevent from blocking thread
             {
-                var dynamicModel =
-                    MessagePackSerializer.Deserialize<dynamic>(data, ContractlessStandardResolver.Instance);
-                string method;
+                string method = null;
                 try
                 {
+                    dynamic dynamicModel =
+                        MessagePackSerializer.Deserialize<dynamic>(data, ContractlessStandardResolver.Instance);
                     method = dynamicModel["method"];
                 }
                 catch (KeyNotFoundException)
                 {
                     method = null;
+                }
+                catch (Exception e)
+                {
+                    throw new RpcException(RpcErrorCode.ParseError, "Parsing received data error.", e);
                 }
 
                 if (method != null) // Received data is request

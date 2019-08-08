@@ -15,7 +15,6 @@ namespace BridgeRpc
         [Key("method")]
         public string Method { get; set; }
         
-        [MessagePackFormatter(typeof(TypelessFormatter))]
         [Key("data")]
         public object Data { get; set; }
 

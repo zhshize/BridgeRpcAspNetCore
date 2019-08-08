@@ -12,7 +12,6 @@ namespace BridgeRpc
         [Key("id")]
         public string Id { get; set; }
         
-        [MessagePackFormatter(typeof(TypelessFormatter))]
         [Key("result")]
         public object Result { get; set; }
         [Key("error")]
