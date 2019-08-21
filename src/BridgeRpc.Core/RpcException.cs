@@ -1,6 +1,6 @@
 using System;
 
-namespace BridgeRpc
+namespace BridgeRpc.Core
 {
     public enum RpcErrorCode
     {

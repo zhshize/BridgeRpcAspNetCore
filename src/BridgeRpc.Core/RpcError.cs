@@ -1,7 +1,6 @@
 using MessagePack;
-using MessagePack.Formatters;
 
-namespace BridgeRpc
+namespace BridgeRpc.Core
 {
     [MessagePackObject]
     public class RpcError

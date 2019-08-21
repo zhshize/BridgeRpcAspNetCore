@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-namespace BridgeRpc.Util
+namespace BridgeRpc.Core.Util
 {
     public class Util
     {

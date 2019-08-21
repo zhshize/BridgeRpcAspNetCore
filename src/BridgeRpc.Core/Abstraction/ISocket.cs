@@ -1,6 +1,6 @@
 using System;
 
-namespace BridgeRpc.Abstraction
+namespace BridgeRpc.Core.Abstraction
 {
     public delegate void OnReceivedEventHandler(object sender, byte[] data);
     

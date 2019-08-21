@@ -1,8 +1,6 @@
 using MessagePack;
-using MessagePack.Formatters;
-using MessagePack.Resolvers;
 
-namespace BridgeRpc
+namespace BridgeRpc.Core
 {
     [MessagePackObject]
     public class RpcResponse

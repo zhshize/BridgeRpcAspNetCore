@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using BridgeRpc.AspNetCore.Router.Abstraction;
+using BridgeRpc.Core;
 using MessagePack;
 
 namespace BridgeRpc.AspNetCore.Router.Basic

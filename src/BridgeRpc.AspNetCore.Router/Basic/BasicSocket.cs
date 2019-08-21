@@ -6,7 +6,8 @@ using System.Linq;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
-using BridgeRpc.Abstraction;
+using BridgeRpc.Core;
+using BridgeRpc.Core.Abstraction;
 
 namespace BridgeRpc.AspNetCore.Router.Basic
 {

@@ -1,8 +1,8 @@
-
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace BridgeRpc.Abstraction
+namespace BridgeRpc.Core.Abstraction
 {
     public delegate RpcResponse RequestHandler(RpcRequest request);
     

@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using BridgeRpc.Abstraction;
+using BridgeRpc.Core.Abstraction;
 using MessagePack;
 using MessagePack.Resolvers;
 
-namespace BridgeRpc
+namespace BridgeRpc.Core
 {
     public class RpcHub : IRpcHub
     {
@@ -16,7 +16,6 @@ namespace BridgeRpc
             _socket = socket;
             _socket.OnReceived += Handle;
         }
-
         public event RequestHandler OnRequest;
 
         public Task<RpcResponse> RequestAsync(string method, object data)

@@ -2,8 +2,8 @@
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
-using BridgeRpc.Abstraction;
 using BridgeRpc.AspNetCore.Router.Basic;
+using BridgeRpc.Core.Abstraction;
 using MessagePack;
 using Microsoft.Extensions.DependencyInjection;
 

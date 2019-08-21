@@ -1,4 +1,5 @@
 using System;
+using BridgeRpc.Core;
 
 namespace BridgeRpc.AspNetCore.Client
 {

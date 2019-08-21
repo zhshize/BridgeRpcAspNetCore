@@ -1,4 +1,5 @@
-using BridgeRpc.Abstraction;
+using BridgeRpc.Core;
+using BridgeRpc.Core.Abstraction;
 
 namespace BridgeRpc.AspNetCore.Router.Abstraction
 {

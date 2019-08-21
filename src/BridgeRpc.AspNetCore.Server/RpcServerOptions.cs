@@ -1,3 +1,5 @@
+using BridgeRpc.Core;
+
 namespace BridgeRpc.AspNetCore.Server
 {
     public class RpcServerOptions

@@ -1,5 +1,5 @@
 using System;
-using BridgeRpc.Abstraction;
+using BridgeRpc.Core.Abstraction;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BridgeRpc.AspNetCore.Client

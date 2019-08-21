@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using BridgeRpc.Core;
 
 namespace BridgeRpc.AspNetCore.Router
 {

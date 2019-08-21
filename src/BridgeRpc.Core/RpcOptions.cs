@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace BridgeRpc
+namespace BridgeRpc.Core
 {
     public class RpcOptions
     {

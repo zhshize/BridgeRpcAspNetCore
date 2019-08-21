@@ -1,9 +1,9 @@
 using System;
 using System.Threading.Tasks;
-using BridgeRpc.Abstraction;
+using BridgeRpc.Core.Abstraction;
 using MessagePack;
 
-namespace BridgeRpc.Extension
+namespace BridgeRpc.Core.Extension
 {
     public static class RpcHubExtension
     {
