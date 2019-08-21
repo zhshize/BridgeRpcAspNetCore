@@ -16,6 +16,8 @@ namespace BridgeRpc.Core
             _socket = socket;
             _socket.OnReceived += Handle;
         }
+
+        public Dictionary<string, object> Items { get; } = new Dictionary<string, object>();
         public event RequestHandler OnRequest;
 
         public Task<RpcResponse> RequestAsync(string method, object data)

@@ -11,6 +11,7 @@ namespace BridgeRpc.Core.Abstraction
     /// </summary>
     public interface IRpcHub
     {
+        Dictionary<string, object> Items { get; }
         /// <summary>
         /// Invoke with <see cref="RpcRequest"/> object when other side requests.
         /// </summary>
