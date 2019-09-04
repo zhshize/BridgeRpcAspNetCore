@@ -3,6 +3,13 @@
     <PropertyGroup>
         <TargetFramework>netcoreapp2.2</TargetFramework>
         <LangVersion>7.1</LangVersion>
+        <PackageVersion>0.0.3</PackageVersion>
+        <Authors>zhshize</Authors>
+        <Description>RPC framework based on WebSocket and MessagePack for ASP.net Core</Description>
+        <Copyright>Copyright © 2019 by zhshize</Copyright>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/zhshize/BridgeRpcAspNetCore</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/zhshize/BridgeRpcAspNetCore</RepositoryUrl>
     </PropertyGroup>
 
     <ItemGroup>

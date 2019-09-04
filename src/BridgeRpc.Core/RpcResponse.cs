@@ -11,7 +11,7 @@ namespace BridgeRpc.Core
         public string Id { get; set; }
         
         [Key("result")]
-        public object Result { get; set; }
+        public byte[] Result { get; set; }
         [Key("error")]
         public RpcError Error { get; set; }
         
@@ -22,18 +22,16 @@ namespace BridgeRpc.Core
         
         public object GetParameterFromResult(string name)
         {
-            /*var dynamicModel = 
-                MessagePackSerializer.Deserialize<dynamic>(Result, ContractlessStandardResolver.Instance);
-
-            return dynamicModel[name];*/
-            dynamic result = Result;
-            return result[name];
+            dynamic data = MessagePackSerializer.Typeless.Deserialize(Result);
+            return data[name];
+            /*dynamic result = Result;
+            return result[name];*/
         }
         
         public T GetResult<T>()
         {
-            //return MessagePackSerializer.Deserialize<T>(Result);
-            return (T) Result;
+            return MessagePackSerializer.Deserialize<T>(Result);
+            // return (T) Result;
         }
     }
 }

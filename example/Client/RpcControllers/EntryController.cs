@@ -7,10 +7,10 @@ namespace Client.RpcControllers
     public class EntryController : RpcController
     {
         [RpcMethod("sayHi")]
-        public string SayHi([RpcParam("name")] string n)
+        public string SayHi( string name)
         {
-            Console.WriteLine("Hi from " + n);
-            return n;
+            Console.WriteLine("Hi from " + name);
+            return name;
         }
     }
 }

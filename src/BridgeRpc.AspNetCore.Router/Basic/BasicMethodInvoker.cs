@@ -85,7 +85,7 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                     //var binary = (byte[]) serializer.Invoke(this, new [] {t});
                     return new RpcResponse
                     {
-                        Result = t
+                        Result = MessagePackSerializer.Serialize(t)
                     };
                 }
             }
@@ -128,11 +128,11 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                     var paramName = paramAttr.ParameterName;
                     if (string.IsNullOrEmpty(paramName))
                         paramName = p.Name;
-                    args.Add(request.GetParameterFromData(paramName));
+                    args.Add(request.GetParameterFromData<object>(paramName));
                 }
                 else
                 {
-                    args.Add(request.GetParameterFromData(p.Name));
+                    args.Add(request.GetParameterFromData<object>(p.Name));
                 }
             }
 

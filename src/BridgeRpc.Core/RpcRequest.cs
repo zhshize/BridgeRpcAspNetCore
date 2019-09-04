@@ -14,7 +14,7 @@ namespace BridgeRpc.Core
         public string Method { get; set; }
         
         [Key("data")]
-        public object Data { get; set; }
+        public byte[] Data { get; set; }
 
         public byte[] ToBinary()
         {
@@ -26,15 +26,15 @@ namespace BridgeRpc.Core
             return Id == null;
         }
         
-        public object GetParameterFromData(string name)
+        public T GetParameterFromData<T>(string name)
         {
-            dynamic data = Data;
+            dynamic data = MessagePackSerializer.Typeless.Deserialize(Data);
             return data[name];
         }
         
         public T GetData<T>()
         {
-            return (T) Data;
+            return MessagePackSerializer.Deserialize<T>(Data);
         }
     }
 }

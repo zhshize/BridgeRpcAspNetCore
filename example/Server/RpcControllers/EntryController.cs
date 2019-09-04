@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using BridgeRpc.AspNetCore.Router;
 using BridgeRpc.Core;
 using BridgeRpc.Core.Abstraction;
+using BridgeRpc.Core.Extension;
 
 namespace Server.RpcControllers
 {
@@ -31,7 +32,7 @@ namespace Server.RpcControllers
 
             try
             {
-                var data = new Dictionary<string, string> {{"name", "amy"}};
+                var data = new  {name = "amy"};
 
                 RpcResponse reqTask = await _rpcHub.RequestAsync("sayHi", data);
 
