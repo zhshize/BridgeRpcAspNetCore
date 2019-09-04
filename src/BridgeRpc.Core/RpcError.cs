@@ -11,9 +11,9 @@ namespace BridgeRpc.Core
         public string Message { get; set; }
         
         [Key("data")]
-        public object Data { get; set; }
+        public byte[] Data { get; set; }
 
-        public RpcError(int code, string message, object data)
+        public RpcError(int code, string message, byte[] data)
         {
             Code = code;
             Message = message;

@@ -20,17 +20,17 @@ namespace BridgeRpc.Core
         public Dictionary<string, object> Items { get; } = new Dictionary<string, object>();
         public event RequestHandler OnRequest;
 
-        public Task<RpcResponse> RequestAsync(string method, object data)
+        public Task<RpcResponse> RequestAsync(string method, byte[] data)
         {
             return RequestAsync(method, data, false, null);
         }
 
-        public Task<RpcResponse> RequestAsync(string method, object data, TimeSpan timeout)
+        public Task<RpcResponse> RequestAsync(string method, byte[] data, TimeSpan timeout)
         {
             return RequestAsync(method, data, true, timeout);
         }
 
-        protected Task<RpcResponse> RequestAsync(string method, object data, bool hasTimeout, TimeSpan? timeout)
+        protected Task<RpcResponse> RequestAsync(string method, byte[] data, bool hasTimeout, TimeSpan? timeout)
         {
             var id = Util.Util.RandomString(16);
             var request = new RpcRequest
@@ -53,7 +53,7 @@ namespace BridgeRpc.Core
             return task;
         }
 
-        public void Notify(string method, object data)
+        public void Notify(string method, byte[] data)
         {
             var request = new RpcRequest
             {
