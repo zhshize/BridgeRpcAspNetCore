@@ -54,7 +54,7 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                     //var binary = (byte[]) serializer.Invoke(this, new [] {t.Result});
                     var res = new RpcResponse
                     {
-                        Result = t.Result
+                        Result = MessagePackSerializer.Serialize(t.Result)
                     };
 
                     if (success) return res;
