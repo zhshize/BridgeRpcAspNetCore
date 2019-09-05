@@ -41,6 +41,7 @@ namespace Client
                             var r = await hub.RequestAsync("greet", "Joe");
                             Console.WriteLine(r.GetResult<string>());
                             await Task.Delay(5000);
+                            hub.OnDisconnect += () => Console.WriteLine("OnDisconnect event from RpcHub.");
                         }
                     };
                     client.OnConnectFailed += e =>

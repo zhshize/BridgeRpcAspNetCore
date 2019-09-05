@@ -58,6 +58,7 @@ namespace Server
                 {
                     Console.WriteLine("Connected");
                     //hub.Notify("notify", MessagePackSerializer.Serialize("hi"));
+                    hub.OnDisconnect += () => Console.WriteLine("OnDisconnect event from RpcHub.");
                 };
                 bus.OnNotAllowed += context => Console.WriteLine("Server not allowed this path: " + context.Request.Path);
                 bus.OnDisconnected += _ => Console.WriteLine("Disconnected");
