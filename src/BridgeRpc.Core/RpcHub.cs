@@ -15,10 +15,12 @@ namespace BridgeRpc.Core
         {
             _socket = socket;
             _socket.OnReceived += Handle;
+            _socket.OnDisconnect += s => OnDisconnect?.Invoke();
         }
 
         public Dictionary<string, object> Items { get; } = new Dictionary<string, object>();
         public event RequestHandler OnRequest;
+        public event DisconnectHandler OnDisconnect;
 
         public Task<RpcResponse> RequestAsync(string method, byte[] data)
         {

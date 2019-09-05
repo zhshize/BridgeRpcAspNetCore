@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 namespace BridgeRpc.Core.Abstraction
 {
     public delegate RpcResponse RequestHandler(RpcRequest request);
+    public delegate void DisconnectHandler();
     
     /// <summary>
     /// Handling and requesting with other side.
@@ -16,6 +17,11 @@ namespace BridgeRpc.Core.Abstraction
         /// Invoke with <see cref="RpcRequest"/> object when other side requests.
         /// </summary>
         event RequestHandler OnRequest;
+        
+        /// <summary>
+        /// Invoke when disconnected.
+        /// </summary>
+        event DisconnectHandler OnDisconnect;
 
         /// <summary>
         /// Call other side.
