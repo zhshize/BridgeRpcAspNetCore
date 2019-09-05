@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>netcoreapp2.2</TargetFramework>
-        <PackageVersion>0.0.3</PackageVersion>
+        <PackageVersion>0.0.5</PackageVersion>
         <Authors>zhshize</Authors>
         <Description>RPC framework based on WebSocket and MessagePack for ASP.net Core</Description>
         <Copyright>Copyright © 2019 by zhshize</Copyright>
@@ -15,8 +15,12 @@
       <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
       <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
       <PackageReference Include="Microsoft.AspNetCore.WebSockets" Version="2.2.1" />
-      <PackageReference Include="BridgeRpc.Core" Version="0.0.3" />
-      <PackageReference Include="BridgeRpc.AspNetCore.Router" Version="0.0.3" />
+      <PackageReference Include="BridgeRpc.Core" Version="0.0.5" />
+      <PackageReference Include="BridgeRpc.AspNetCore.Router" Version="0.0.5" />
+        
     </ItemGroup>
-
+    <!--<ItemGroup>
+        <ProjectReference Include="../BridgeRpc.Core/BridgeRpc.Core.csproj" />
+        <ProjectReference Include="../BridgeRpc.AspNetCore.Router/BridgeRpc.AspNetCore.Router.csproj" />
+    </ItemGroup>-->
 </Project>
