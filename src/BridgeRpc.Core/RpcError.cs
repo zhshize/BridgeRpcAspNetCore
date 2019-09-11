@@ -19,5 +19,10 @@ namespace BridgeRpc.Core
             Message = message;
             Data = data;
         }
+        
+        public T GetData<T>()
+        {
+            return MessagePackSerializer.Deserialize<T>(Data);
+        }
     }
 }

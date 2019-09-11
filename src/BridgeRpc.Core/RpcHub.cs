@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BridgeRpc.Core.Abstraction;
+using BridgeRpc.Core.Util;
 using MessagePack;
 using MessagePack.Resolvers;
 
@@ -21,18 +22,15 @@ namespace BridgeRpc.Core
         public Dictionary<string, object> Items { get; } = new Dictionary<string, object>();
         public event RequestHandler OnRequest;
         public event DisconnectHandler OnDisconnect;
+        public event OnMessageExceptionHandler OnMessageException;
+        public event OnRequestInvokingExceptionHandler OnRequestInvokingException;
 
-        public Task<RpcResponse> RequestAsync(string method, byte[] data)
+        public Task<RpcResponse> RequestAsync(string method, byte[] data, bool throwRpcException = false, TimeSpan? timeout = null)
         {
-            return RequestAsync(method, data, false, null);
+            return RequestAsync(method, data, timeout.HasValue, throwRpcException, timeout);
         }
 
-        public Task<RpcResponse> RequestAsync(string method, byte[] data, TimeSpan timeout)
-        {
-            return RequestAsync(method, data, true, timeout);
-        }
-
-        protected Task<RpcResponse> RequestAsync(string method, byte[] data, bool hasTimeout, TimeSpan? timeout)
+        protected Task<RpcResponse> RequestAsync(string method, byte[] data, bool hasTimeout, bool throwRpcException, TimeSpan? timeout)
         {
             var id = Util.Util.RandomString(16);
             var request = new RpcRequest
@@ -42,10 +40,19 @@ namespace BridgeRpc.Core
                 Data = data
             };
 
-            var taskSource = new TaskCompletionSource<RpcResponse>();
+            var taskSource = new RequestTaskCompletionSource();
+            taskSource.ThrowRpcException = throwRpcException;
             var task = taskSource.Task;
             RequestingQueue.Add(id, taskSource);
-            _socket.Send(request.ToBinary());
+
+            try
+            {
+                _socket.Send(request.ToBinary());
+            }
+            catch (Exception e)
+            {
+                taskSource.SetException(e);
+            }
 
             if (hasTimeout && timeout != null)
                 Task.Run(() => 
@@ -71,8 +78,8 @@ namespace BridgeRpc.Core
             _socket.Disconnect();
         }
 
-        protected readonly Dictionary<string, TaskCompletionSource<RpcResponse>> RequestingQueue
-            = new Dictionary<string, TaskCompletionSource<RpcResponse>>();
+        protected readonly Dictionary<string, RequestTaskCompletionSource> RequestingQueue
+            = new Dictionary<string, RequestTaskCompletionSource>();
 
         protected void Handle(object sender, byte[] data)
         {
@@ -91,6 +98,7 @@ namespace BridgeRpc.Core
                 }
                 catch (Exception e)
                 {
+                    OnMessageException?.Invoke(e, data);
                     throw new RpcException(RpcErrorCode.ParseError, "Parsing received data error.", e);
                 }
 
@@ -104,6 +112,7 @@ namespace BridgeRpc.Core
                     catch (Exception e)
                     {
                         // because request cannot be deserialized, no error object will be sent back
+                        OnMessageException?.Invoke(e, data);
                         throw new RpcException(RpcErrorCode.ParseError, "Parsing request object error.", e);
                     }
 
@@ -131,7 +140,7 @@ namespace BridgeRpc.Core
                         {
                             // ignored
                         }
-
+                        OnRequestInvokingException?.Invoke(e, data);
                         throw new RpcException(RpcErrorCode.InternalError, e.Message, e);
                     }
                 }
@@ -149,6 +158,7 @@ namespace BridgeRpc.Core
                     
                     if (response.Id != null && RequestingQueue.ContainsKey(response.Id))
                     {
+                        
                         RequestingQueue[response.Id].SetResult(response);
                     }
                 }
