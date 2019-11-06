@@ -48,7 +48,8 @@ namespace BridgeRpc.AspNetCore.Client
                                 Task.Run(() =>
 #pragma warning restore 4014
                                 {
-                                    if (scope != null) OnConnected?.Invoke(handler, scope.ServiceProvider);
+                                    // ReSharper disable once AccessToDisposedClosure
+                                    OnConnected?.Invoke(handler, scope.ServiceProvider);
                                 });
                                 await socket.Start();
                             }
