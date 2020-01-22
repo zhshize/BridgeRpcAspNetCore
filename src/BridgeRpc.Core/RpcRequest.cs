@@ -1,40 +1,71 @@
-using MessagePack;
+using System;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace BridgeRpc.Core
 {
-    [MessagePackObject]
     public class RpcRequest
     {
-        [Key("bridgerpc")]
+        [JsonProperty("bridgerpc")]
         public string Version { get; set; } = "1.0";
-        [Key("id")]
+        
+        [JsonProperty("id")]
         public string Id { get; set; }
         
-        [Key("method")]
+        [JsonProperty("method")]
         public string Method { get; set; }
         
-        [Key("data")]
-        public byte[] Data { get; set; }
-
-        public byte[] ToBinary()
+        [JsonProperty("data")]
+        public JRaw Data { get; set; }
+        
+        public RpcRequest()
         {
-            return MessagePackSerializer.Serialize(this);
+            
+        }
+
+        public RpcRequest(string json)
+        {
+            try
+            {
+                var request = FromJsonString(json);
+                Version = request.Version;
+                Id = request.Id;
+                Method = request.Method;
+                Data = request.Data;
+            }
+            catch (JsonException je)
+            {
+                throw new RpcException(RpcErrorCode.ParseError, "Json paring error in RpcResponse(string json).", je);
+            }
+            catch (Exception e)
+            {
+                throw new RpcException(RpcErrorCode.InternalError, "Internal error in RpcResponse(string json).", e);
+            }
+        }
+
+        public string ToJson()
+        {
+            return JsonConvert.SerializeObject(this);
         }
 
         public bool IsNotify()
         {
             return Id == null;
         }
-        
-        public T GetParameterFromData<T>(string name)
+
+        public void SetData<T>(T obj)
         {
-            dynamic data = MessagePackSerializer.Typeless.Deserialize(Data);
-            return data[name];
+            Data = new JRaw(obj);
         }
-        
+
         public T GetData<T>()
         {
-            return MessagePackSerializer.Deserialize<T>(Data);
+            return Data.ToObject<T>();
+        }
+        
+        public static RpcRequest FromJsonString(string json)
+        {
+            return JsonConvert.DeserializeObject<RpcRequest>(json);
         }
     }
 }

@@ -1,19 +1,24 @@
-using MessagePack;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace BridgeRpc.Core
 {
-    [MessagePackObject]
     public class RpcError
     {
-        [Key("code")]
+        [JsonProperty("code")]
         public int Code { get; set; }
-        [Key("message")]
+        [JsonProperty("message")]
         public string Message { get; set; }
         
-        [Key("data")]
-        public byte[] Data { get; set; }
+        [JsonProperty("data")]
+        public JRaw Data { get; set; }
 
-        public RpcError(int code, string message, byte[] data)
+        public RpcError()
+        {
+            
+        }
+
+        public RpcError(int code, string message, JRaw data)
         {
             Code = code;
             Message = message;
@@ -22,7 +27,7 @@ namespace BridgeRpc.Core
         
         public T GetData<T>()
         {
-            return MessagePackSerializer.Deserialize<T>(Data);
+            return Data.ToObject<T>();
         }
     }
 }

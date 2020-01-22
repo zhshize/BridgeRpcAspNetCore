@@ -1,4 +1,5 @@
 using System;
+using Newtonsoft.Json.Linq;
 
 namespace BridgeRpc.Core
 {
@@ -24,13 +25,13 @@ namespace BridgeRpc.Core
         /// <summary>
         /// Custom data attached to the error if needed
         /// </summary>
-        public byte[] RpcData { get; }
+        public JRaw RpcData { get; }
 		
         /// <param name="errorCode">Rpc error code</param>
         /// <param name="message">Error message</param>
         /// <param name="data">Custom data if needed for error response</param>
         /// <param name="innerException">Inner exception (optional)</param>
-        public RpcException(int errorCode, string message, Exception innerException = null, byte[] data = null)
+        public RpcException(int errorCode, string message, Exception innerException = null, JRaw data = null)
             : base(message, innerException)
         {
             ErrorCode = errorCode;
@@ -40,7 +41,7 @@ namespace BridgeRpc.Core
         /// <param name="message">Error message</param>
         /// <param name="data">Custom data if needed for error response</param>
         /// <param name="innerException">Inner exception (optional)</param>
-        public RpcException(RpcErrorCode errorCode, string message, Exception innerException = null, byte[] data = null)
+        public RpcException(RpcErrorCode errorCode, string message, Exception innerException = null, JRaw data = null)
             : this((int)errorCode, message, innerException, data)
         {
         }
