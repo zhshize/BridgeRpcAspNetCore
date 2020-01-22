@@ -93,8 +93,8 @@ namespace BridgeRpc.Core
                     if (jo.Type == JTokenType.Object)
                     {
                         var mp = jo.Property("method");
-                        if (mp != null && mp.Type == JTokenType.String)
-                            method = mp.Value<string>();
+                        if (mp != null && mp.Type == JTokenType.Property && mp.Value.Type == JTokenType.String)
+                            method = mp.Value.Value<string>();
                     }
                 }
                 catch (ArgumentOutOfRangeException ae)
