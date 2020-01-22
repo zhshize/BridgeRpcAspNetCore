@@ -43,6 +43,11 @@ namespace BridgeRpc.Core
             }
         }
 
+        public T GetParameterFromData<T>(string name)
+        {
+            return Data.Type == JTokenType.Object ? Data[name].ToObject<T>() : (T) Data.Value;
+        }
+
         public string ToJson()
         {
             return JsonConvert.SerializeObject(this);

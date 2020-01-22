@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using BridgeRpc.AspNetCore.Router.Abstraction;
 using BridgeRpc.Core;
-using MessagePack;
+using Newtonsoft.Json.Linq;
 
 namespace BridgeRpc.AspNetCore.Router.Basic
 {
@@ -54,7 +54,7 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                     //var binary = (byte[]) serializer.Invoke(this, new [] {t.Result});
                     var res = new RpcResponse
                     {
-                        Result = MessagePackSerializer.Serialize(t.Result)
+                        Result = new JRaw(t.Result)
                     };
 
                     if (success) return res;
@@ -85,7 +85,7 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                     //var binary = (byte[]) serializer.Invoke(this, new [] {t});
                     return new RpcResponse
                     {
-                        Result = MessagePackSerializer.Serialize(t)
+                        Result = new JRaw(t)
                     };
                 }
             }
@@ -116,7 +116,7 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                 if (dataAttr != null)
                 {
                     var data = request.GetType().GetMethod(nameof(request.GetData))
-                        .MakeGenericMethod(dataAttr.TypeRequired).Invoke(request, null);
+                        ?.MakeGenericMethod(dataAttr.TypeRequired).Invoke(request, null);
                     args.Add(data);
                 }
                 else if (p.ParameterType == typeof(RpcRequest))
@@ -128,11 +128,18 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                     var paramName = paramAttr.ParameterName;
                     if (string.IsNullOrEmpty(paramName))
                         paramName = p.Name;
-                    args.Add(request.GetParameterFromData<object>(paramName));
+                    
+                    var getParamMethod = typeof(RpcRequest).GetMethod("GetParameterFromData");
+                    if (getParamMethod == null) continue;
+                    var methodRef = getParamMethod.MakeGenericMethod(p.ParameterType);
+                    args.Add(methodRef.Invoke(request, new object[] { paramName }));
                 }
                 else
                 {
-                    args.Add(request.GetParameterFromData<object>(p.Name));
+                    var getParamMethod = typeof(RpcRequest).GetMethod("GetParameterFromData");
+                    if (getParamMethod == null) continue;
+                    var methodRef = getParamMethod.MakeGenericMethod(p.ParameterType);
+                    args.Add(methodRef.Invoke(request, new object[] { p.Name }));
                 }
             }
 

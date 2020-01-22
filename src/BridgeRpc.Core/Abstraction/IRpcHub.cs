@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 
 namespace BridgeRpc.Core.Abstraction
 {
     public delegate RpcResponse RequestHandler(RpcRequest request);
     public delegate void DisconnectHandler();
-    public delegate void MessageExceptionHandler(Exception e, byte[] message);
-    public delegate void RequestInvokingExceptionHandler(Exception e, byte[] message);
+    public delegate void MessageExceptionHandler(Exception e, string message);
+    public delegate void RequestInvokingExceptionHandler(Exception e, string message);
     
     /// <summary>
     /// Handling and requesting with other side.
@@ -43,19 +44,19 @@ namespace BridgeRpc.Core.Abstraction
         /// Call other side.
         /// </summary>
         /// <param name="method">Method name</param>
-        /// <param name="data">Binary data will be sent</param>
+        /// <param name="param">Json string (Object, Array) will be sent</param>
         /// <param name="throwRpcException">If true, when the Error field preset in the response,
         /// this task will throw the error as a <see cref="RpcException"/>.</param>
         /// <param name="timeout">Request timeout</param>
         /// <returns><see cref="RpcResponse"/> sent from other side</returns>
-        Task<RpcResponse> RequestAsync(string method, byte[] data, bool throwRpcException = false, TimeSpan? timeout = null);
+        Task<RpcResponse> RequestAsync(string method, JRaw param, bool throwRpcException = false, TimeSpan? timeout = null);
 
         /// <summary>
         /// Notify other side.  No response will be sent back.
         /// </summary>
         /// <param name="method">Method name</param>
-        /// <param name="data">Binary data will be sent</param>
-        void Notify(string method, byte[] data);
+        /// <param name="param">Json string (Object, Array) will be sent</param>
+        void Notify(string method, JRaw param);
 
         /// <summary>
         /// Disconnect.

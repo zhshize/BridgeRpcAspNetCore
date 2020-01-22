@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using BridgeRpc.Core.Abstraction;
-using MessagePack;
+using Newtonsoft.Json.Linq;
 
 namespace BridgeRpc.Core.Extension
 {
@@ -9,17 +9,17 @@ namespace BridgeRpc.Core.Extension
     {
         public static Task<RpcResponse> RequestAsync<T>(this IRpcHub hub, string method, T data)
         {
-            return hub.RequestAsync(method, MessagePackSerializer.Serialize(data));
+            return hub.RequestAsync(method, new JRaw(data));
         }
         
         public static Task<RpcResponse> RequestAsync<T>(this IRpcHub hub, string method, T data, TimeSpan timeout)
         {
-            return hub.RequestAsync(method, MessagePackSerializer.Serialize(data), timeout);
+            return hub.RequestAsync(method, new JRaw(data), timeout);
         }
         
         public static void Notify<T>(this IRpcHub hub, string method, T data)
         {
-            hub.Notify(method, MessagePackSerializer.Serialize(data));
+            hub.Notify(method, new JRaw(data));
         }
     }
 }

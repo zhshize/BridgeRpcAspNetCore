@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using BridgeRpc.Core.Abstraction;
 using BridgeRpc.Core.Util;
-using MessagePack;
-using MessagePack.Resolvers;
+using Newtonsoft.Json.Linq;
 
 namespace BridgeRpc.Core
 {
@@ -25,29 +25,28 @@ namespace BridgeRpc.Core
         public event MessageExceptionHandler OnMessageException;
         public event RequestInvokingExceptionHandler OnRequestInvokingException;
 
-        public Task<RpcResponse> RequestAsync(string method, byte[] data, bool throwRpcException = false, TimeSpan? timeout = null)
+        public Task<RpcResponse> RequestAsync(string method, JRaw param, bool throwRpcException = false, TimeSpan? timeout = null)
         {
-            return RequestAsync(method, data, timeout.HasValue, throwRpcException, timeout);
+            return RequestAsync(method, param, timeout.HasValue, throwRpcException, timeout);
         }
 
-        protected Task<RpcResponse> RequestAsync(string method, byte[] data, bool hasTimeout, bool throwRpcException, TimeSpan? timeout)
+        protected Task<RpcResponse> RequestAsync(string method, JRaw param, bool hasTimeout, bool throwRpcException, TimeSpan? timeout)
         {
             var id = Util.Util.RandomString(16);
             var request = new RpcRequest
             {
                 Id = id,
                 Method = method,
-                Data = data
+                Data = param
             };
 
-            var taskSource = new RequestTaskCompletionSource();
-            taskSource.ThrowRpcException = throwRpcException;
+            var taskSource = new RequestTaskCompletionSource { ThrowRpcException = throwRpcException };
             var task = taskSource.Task;
             RequestingQueue.Add(id, taskSource);
 
             try
             {
-                _socket.Send(request.ToBinary());
+                _socket.Send(Encoding.UTF8.GetBytes(request.ToJson()));
             }
             catch (Exception e)
             {
@@ -62,15 +61,15 @@ namespace BridgeRpc.Core
             return task;
         }
 
-        public void Notify(string method, byte[] data)
+        public void Notify(string method, JRaw param)
         {
             var request = new RpcRequest
             {
                 Id = null,
                 Method = method,
-                Data = data
+                Data = param
             };
-            _socket.Send(request.ToBinary());
+            _socket.Send(Encoding.UTF8.GetBytes(request.ToJson()));
         }
 
         public void Disconnect()
@@ -85,12 +84,38 @@ namespace BridgeRpc.Core
         {
             Task.Run(() => // prevent from blocking thread
             {
+                string json = null;
                 string method = null;
                 try
                 {
-                    dynamic dynamicModel =
-                        MessagePackSerializer.Deserialize<dynamic>(data, ContractlessStandardResolver.Instance);
-                    method = dynamicModel["method"];
+                    json = Encoding.UTF8.GetString(data);
+                    var jo = JObject.Parse(json);
+                    if (jo.Type == JTokenType.Object)
+                    {
+                        var mp = jo.Property("method");
+                        if (mp != null && mp.Type == JTokenType.String)
+                            method = mp.Value<string>();
+                    }
+                }
+                catch (ArgumentOutOfRangeException ae)
+                {
+                    OnMessageException?.Invoke(ae, "data index is invalid in Handle(object sender, byte[] data)");
+                    throw new RpcException(RpcErrorCode.ParseError, "Parsing received data error.", ae);
+                }
+                catch (ArgumentNullException ae)
+                {
+                    OnMessageException?.Invoke(ae, "data is null in Handle(object sender, byte[] data)");
+                    throw new RpcException(RpcErrorCode.ParseError, "Parsing received data error.", ae);
+                }
+                catch (DecoderFallbackException de)
+                {
+                    OnMessageException?.Invoke(de, "Decoding to UTF-8 string failed in Handle(object sender, byte[] data)");
+                    throw new RpcException(RpcErrorCode.ParseError, "Parsing received data error.", de);
+                }
+                catch (ArgumentException ae)
+                {
+                    OnMessageException?.Invoke(ae, "Decoding to UTF-8 string failed in Handle(object sender, byte[] data)");
+                    throw new RpcException(RpcErrorCode.ParseError, "Parsing received data error.", ae);
                 }
                 catch (KeyNotFoundException)
                 {
@@ -98,7 +123,7 @@ namespace BridgeRpc.Core
                 }
                 catch (Exception e)
                 {
-                    OnMessageException?.Invoke(e, data);
+                    OnMessageException?.Invoke(e, "Other internal error");
                     throw new RpcException(RpcErrorCode.ParseError, "Parsing received data error.", e);
                 }
 
@@ -107,12 +132,12 @@ namespace BridgeRpc.Core
                     RpcRequest req;
                     try
                     {
-                        req = MessagePackSerializer.Deserialize<RpcRequest>(data);
+                        req = RpcRequest.FromJsonString(json);
                     }
                     catch (Exception e)
                     {
                         // because request cannot be deserialized, no error object will be sent back
-                        OnMessageException?.Invoke(e, data);
+                        OnMessageException?.Invoke(e, e.Message);
                         throw new RpcException(RpcErrorCode.ParseError, "Parsing request object error.", e);
                     }
 
@@ -122,7 +147,7 @@ namespace BridgeRpc.Core
                         if (!req.IsNotify() && res != null)
                         {
                             res.Id = req.Id;
-                            _socket.Send(res.ToBinary());
+                            _socket.Send(Encoding.UTF8.GetBytes(res.ToJson()));
                         }
                     }
                     catch (Exception e)
@@ -134,13 +159,13 @@ namespace BridgeRpc.Core
                                 Id = req.Id,
                                 Error = new RpcError((int) RpcErrorCode.InternalError, e.Message, null)
                             };
-                            _socket.Send(res.ToBinary());
+                            _socket.Send(Encoding.UTF8.GetBytes(res.ToJson()));
                         }
                         catch
                         {
-                            // ignored
+                            // error in error handling, ignored...
                         }
-                        OnRequestInvokingException?.Invoke(e, data);
+                        OnRequestInvokingException?.Invoke(e, e.Message);
                         throw new RpcException(RpcErrorCode.InternalError, e.Message, e);
                     }
                 }
@@ -149,7 +174,7 @@ namespace BridgeRpc.Core
                     RpcResponse response;
                     try
                     {
-                        response = MessagePackSerializer.Deserialize<RpcResponse>(data);
+                        response = RpcResponse.FromJsonString(json);
                     }
                     catch (Exception e)
                     {
@@ -158,7 +183,6 @@ namespace BridgeRpc.Core
                     
                     if (response.Id != null && RequestingQueue.ContainsKey(response.Id))
                     {
-                        
                         RequestingQueue[response.Id].SetResult(response);
                     }
                 }
