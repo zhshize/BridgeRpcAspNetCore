@@ -14,7 +14,11 @@ namespace BridgeRpc.Core.Abstraction
     /// </summary>
     public interface IRpcHub
     {
+        /// <summary>
+        /// Custom data for a connection.
+        /// </summary>
         Dictionary<string, object> Items { get; }
+        
         /// <summary>
         /// Invoke with <see cref="RpcRequest"/> object when other side requests.
         /// </summary>
