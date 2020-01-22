@@ -20,7 +20,7 @@ namespace BridgeRpc.AspNetCore.Client
         }
 
         public event Action<IRpcHub, IServiceProvider> OnConnected;
-        public event Action OnDisonnected;
+        public event Action OnDisconnected;
         public event Action<Exception> OnConnectFailed;
 
         public void Run()
@@ -58,7 +58,7 @@ namespace BridgeRpc.AspNetCore.Client
                             }
                         }
 
-                        OnDisonnected?.Invoke();
+                        OnDisconnected?.Invoke();
                     }
 
                     if (Options.ReconnectInterval.HasValue)

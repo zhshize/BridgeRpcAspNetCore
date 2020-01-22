@@ -31,7 +31,7 @@ namespace BridgeRpc.AspNetCore.Client
             var connection = services.GetRequiredService<Connection>();
             if (Options != null) connection.Options = Options;
             connection.OnConnected += (hub, provider) => OnConnected?.Invoke(hub, provider);
-            connection.OnDisonnected += () => OnDisconnected?.Invoke();
+            connection.OnDisconnected += () => OnDisconnected?.Invoke();
             connection.OnConnectFailed += e => OnConnectFailed?.Invoke(e);
             connection.Run();
         }
