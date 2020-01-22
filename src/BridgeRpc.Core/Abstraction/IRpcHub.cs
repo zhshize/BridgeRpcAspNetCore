@@ -6,8 +6,8 @@ namespace BridgeRpc.Core.Abstraction
 {
     public delegate RpcResponse RequestHandler(RpcRequest request);
     public delegate void DisconnectHandler();
-    public delegate void OnMessageExceptionHandler(Exception e, byte[] message);
-    public delegate void OnRequestInvokingExceptionHandler(Exception e, byte[] message);
+    public delegate void MessageExceptionHandler(Exception e, byte[] message);
+    public delegate void RequestInvokingExceptionHandler(Exception e, byte[] message);
     
     /// <summary>
     /// Handling and requesting with other side.
@@ -32,12 +32,12 @@ namespace BridgeRpc.Core.Abstraction
         /// <summary>
         /// Invoke when an Exception object thrown during the data received
         /// </summary>
-        event OnMessageExceptionHandler OnMessageException;
+        event MessageExceptionHandler OnMessageException;
         
         /// <summary>
         /// 
         /// </summary>
-        event OnRequestInvokingExceptionHandler OnRequestInvokingException;
+        event RequestInvokingExceptionHandler OnRequestInvokingException;
 
         /// <summary>
         /// Call other side.

@@ -22,8 +22,8 @@ namespace BridgeRpc.Core
         public Dictionary<string, object> Items { get; } = new Dictionary<string, object>();
         public event RequestHandler OnRequest;
         public event DisconnectHandler OnDisconnect;
-        public event OnMessageExceptionHandler OnMessageException;
-        public event OnRequestInvokingExceptionHandler OnRequestInvokingException;
+        public event MessageExceptionHandler OnMessageException;
+        public event RequestInvokingExceptionHandler OnRequestInvokingException;
 
         public Task<RpcResponse> RequestAsync(string method, byte[] data, bool throwRpcException = false, TimeSpan? timeout = null)
         {
