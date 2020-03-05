@@ -5,12 +5,13 @@ using BridgeRpc.AspNetCore.Router;
 using BridgeRpc.AspNetCore.Server;
 using BridgeRpc.AspNetCore.Server.Extensions;
 using BridgeRpc.AspNetCore.Server.Extensions.DependencyInjection;
-using MessagePack;
+using BridgeRpc.Core;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json.Linq;
 
 namespace Server
 {

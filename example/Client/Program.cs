@@ -36,6 +36,11 @@ namespace Client
                 {
                     client.OnConnected += async (hub, provider) =>
                     {
+                        hub.OnMessageException += (exception, message) =>
+                        {
+                            Console.WriteLine(message);
+                            Console.WriteLine(exception);
+                        };
                         while (true)
                         {
                             var r = await hub.RequestAsync("greet", "Joe");

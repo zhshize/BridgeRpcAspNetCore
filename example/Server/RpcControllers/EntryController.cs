@@ -13,11 +13,9 @@ namespace Server.RpcControllers
     [TestingFilter("before action filter: 2 at EntryController")]
     public class EntryController : RpcController
     {
-        private readonly IRpcHub _rpcHub;
-
-        public EntryController(IRpcHub rpcHub)
+        public EntryController()
         {
-            _rpcHub = rpcHub;
+
         }
 
 
@@ -34,7 +32,7 @@ namespace Server.RpcControllers
             {
                 var data = new  {name = "amy"};
 
-                RpcResponse reqTask = await _rpcHub.RequestAsync("sayHi", data);
+                RpcResponse reqTask = await RpcContext.Hub.RequestAsync("sayHi", data);
 
                 Console.WriteLine("Amy says Hi, got reply, he says " + reqTask.GetResult<string>());
             }
