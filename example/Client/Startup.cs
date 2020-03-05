@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using BridgeRpc.AspNetCore.Client;
-using BridgeRpc.AspNetCore.Client.Extensions.DependencyInjection;
+﻿using BridgeRpc.AspNetCore.Client.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;

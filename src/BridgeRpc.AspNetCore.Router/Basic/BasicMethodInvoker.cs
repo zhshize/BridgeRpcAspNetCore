@@ -6,7 +6,6 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using BridgeRpc.AspNetCore.Router.Abstraction;
 using BridgeRpc.Core;
-using Newtonsoft.Json.Linq;
 
 namespace BridgeRpc.AspNetCore.Router.Basic
 {
