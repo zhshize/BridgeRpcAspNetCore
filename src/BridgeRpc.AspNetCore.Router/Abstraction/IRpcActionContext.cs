@@ -5,8 +5,8 @@ namespace BridgeRpc.AspNetCore.Router.Abstraction
 {
     public interface IRpcActionContext
     {
-        IRpcHub Hub { get; }
-        RpcRequest Request { get; }
+        IRpcHub Hub { get; set; }
+        RpcRequest Request { get; set; }
         RpcResponse Response { get; set; }
     }
 }

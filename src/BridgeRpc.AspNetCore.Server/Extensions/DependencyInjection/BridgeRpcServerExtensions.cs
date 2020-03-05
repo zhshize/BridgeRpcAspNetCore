@@ -47,6 +47,7 @@ namespace BridgeRpc.AspNetCore.Server.Extensions.DependencyInjection
             services.AddScoped<IMethodInvoker, BasicMethodInvoker>();
             services.AddScoped<IRpcControllerProvider, BasicRpcControllerProvider>();
             services.AddScoped<IRpcMethodProvider, BasicRpcMethodProvider>();
+            services.AddScoped<IRpcActionContext, RpcActionContext>();
 
             AddRpcControllers(services);
         }
