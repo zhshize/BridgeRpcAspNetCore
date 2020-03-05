@@ -2,8 +2,16 @@ using System;
 
 namespace BridgeRpc.Core.Abstraction
 {
+    /// <summary>
+    /// Event handler for new data received
+    /// </summary>
+    /// <param name="sender">Event source</param>
+    /// <param name="data">received data in bytes</param>
     public delegate void OnReceivedEventHandler(object sender, byte[] data);
     
+    /// <summary>
+    /// A socket for Bridge RPC data transportation
+    /// </summary>
     public interface ISocket
     {
         /// <summary>

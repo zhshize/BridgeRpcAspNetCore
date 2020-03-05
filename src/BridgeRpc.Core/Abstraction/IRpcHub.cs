@@ -36,7 +36,7 @@ namespace BridgeRpc.Core.Abstraction
         event MessageExceptionHandler OnMessageException;
         
         /// <summary>
-        /// 
+        /// Invoke when calling request handler
         /// </summary>
         event RequestInvokingExceptionHandler OnRequestInvokingException;
 
@@ -44,18 +44,18 @@ namespace BridgeRpc.Core.Abstraction
         /// Call other side.
         /// </summary>
         /// <param name="method">Method name</param>
-        /// <param name="param">Json string (Object, Array) will be sent</param>
+        /// <param name="param">Data will be sent</param>
         /// <param name="throwRpcException">If true, when the Error field preset in the response,
         /// this task will throw the error as a <see cref="RpcException"/>.</param>
         /// <param name="timeout">Request timeout</param>
-        /// <returns><see cref="RpcResponse"/> sent from other side</returns>
+        /// <returns><see cref="RpcResponse"/> received from other side</returns>
         Task<RpcResponse> RequestAsync(string method, object param, bool throwRpcException = false, TimeSpan? timeout = null);
 
         /// <summary>
         /// Notify other side.  No response will be sent back.
         /// </summary>
         /// <param name="method">Method name</param>
-        /// <param name="param">Json string (Object, Array) will be sent</param>
+        /// <param name="param">Data will be sent</param>
         void Notify(string method, object param);
 
         /// <summary>
