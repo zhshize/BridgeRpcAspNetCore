@@ -42,7 +42,6 @@ namespace BridgeRpc.AspNetCore.Client
                                 var router = scope.ServiceProvider.GetService<BasicRouter>();
                                 router.ClientId = Options.ClientId;
                                 var handler = scope.ServiceProvider.GetService<IRpcHub>();
-                                // TODO: socket initialize
 #pragma warning disable 4014
                                 Task.Run(() =>
 #pragma warning restore 4014
