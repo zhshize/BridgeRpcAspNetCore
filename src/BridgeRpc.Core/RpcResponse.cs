@@ -6,32 +6,35 @@ namespace BridgeRpc.Core
 {
     public class RpcResponse
     {
-        [JsonProperty("bridgerpc")]
-        public string Version { get; set; } = "1.0";
+        public string Version
+        {
+            get => RawObject["bridgerpc"].ToString();
+            set => RawObject["bridgerpc"] = value;
+        }
         
-        [JsonProperty("id")]
-        public string Id { get; set; }
+        public string Id
+        {
+            get => RawObject["id"].ToString();
+            set => RawObject["id"] = value;
+        }
         
-        [JsonProperty("result")]
-        public JRaw Result { get; set; }
+        public object Result => RawObject["result"];
         
-        [JsonProperty("error")]
-        public RpcError Error { get; set; }
+        public RpcError Error { get; private set; }
+        
+        protected JObject RawObject { get; set; }
 
         public RpcResponse()
         {
-            
+            RawObject = new JObject {["bridgerpc"] = "1.0", ["id"] = "", ["result"] = null, ["error"] = null};
         }
 
         public RpcResponse(string json)
         {
             try
             {
-                var response = FromJsonString(json);
-                Version = response.Version;
-                Id = response.Id;
-                Result = response.Result;
-                Error = response.Error;
+                RawObject = JObject.Parse(json);
+                SyncErrorObject();
             }
             catch (JsonException je)
             {
@@ -45,17 +48,52 @@ namespace BridgeRpc.Core
 
         public string ToJson()
         {
-            return JsonConvert.SerializeObject(this);
+            return RawObject.ToString();
+        }
+
+        public void SetResult<T>(T obj)
+        {
+            if (obj is JToken token)
+            {
+                RawObject["result"] = token;
+            }
+            else if (obj is string str)
+            {
+                RawObject["result"] = str;
+            }
+            else
+            {
+                RawObject["result"] = JObject.FromObject(obj);
+            }
         }
 
         public T GetResult<T>()
         {
-            return Result.ToObject<T>();
+            return RawObject["result"].ToObject<T>();
         }
         
-        public static RpcResponse FromJsonString(string json)
+        public JToken GetResult()
         {
-            return JsonConvert.DeserializeObject<RpcResponse>(json);
+            return RawObject["result"];
+        }
+
+        public void SetError<T>(int code, string message, T data)
+        {
+            var err = new JObject {{"code", code}, {"message", message}, {"data", JToken.FromObject(data)}};
+            RawObject["error"] = err;
+            SyncErrorObject();
+        }
+        
+        public void ClearError()
+        {
+            RawObject["error"] = null;
+            SyncErrorObject();
+        }
+
+        private void SyncErrorObject()
+        {
+            Error = RawObject.Property("error").Value.Type == JTokenType.Null ? 
+                null : new RpcError(RawObject.Property("error").Value as JObject);
         }
     }
 }

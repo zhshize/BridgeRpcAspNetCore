@@ -5,29 +5,64 @@ namespace BridgeRpc.Core
 {
     public class RpcError
     {
-        [JsonProperty("code")]
-        public int Code { get; set; }
-        [JsonProperty("message")]
-        public string Message { get; set; }
+        public int Code
+        { 
+            get => RawObject["code"].ToObject<int>();
+            set => RawObject["code"] = value;
+        }
         
-        [JsonProperty("data")]
-        public JRaw Data { get; set; }
+        public string Message
+        { 
+            get => RawObject["message"].ToString();
+            set => RawObject["message"] = value;
+        }
+        
+        public object Data => RawObject["data"];
+        
+        protected JObject RawObject { get; set; }
 
         public RpcError()
         {
-            
-        }
-
-        public RpcError(int code, string message, JRaw data)
-        {
-            Code = code;
-            Message = message;
-            Data = data;
+            RawObject = new JObject {["code"] = 0, ["message"] = "", ["data"] = null};
         }
         
+        public RpcError(JObject jObject)
+        {
+            RawObject = jObject;
+        }
+
+        public RpcError(int code, string message, object data)
+        {
+            RawObject = new JObject {["code"] = 0, ["message"] = "", ["data"] = null};
+            Code = code;
+            Message = message;
+            SetData(data);
+        }
+        
+        public void SetData<T>(T obj)
+        {
+            if (obj is JToken token)
+            {
+                RawObject["data"] = token;
+            }
+            else if (obj is string str)
+            {
+                RawObject["data"] = str;
+            }
+            else
+            {
+                RawObject["data"] = JObject.FromObject(obj);
+            }
+        }
+
         public T GetData<T>()
         {
-            return Data.ToObject<T>();
+            return RawObject["data"].ToObject<T>();
+        }
+        
+        public JToken GetData()
+        {
+            return RawObject["data"];
         }
     }
 }

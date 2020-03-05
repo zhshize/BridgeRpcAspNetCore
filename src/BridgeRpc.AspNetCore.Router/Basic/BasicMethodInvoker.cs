@@ -52,10 +52,8 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                     //var serializer = SerializeMethod.MakeGenericMethod(finalType);
 
                     //var binary = (byte[]) serializer.Invoke(this, new [] {t.Result});
-                    var res = new RpcResponse
-                    {
-                        Result = new JRaw(t.Result)
-                    };
+                    var res = new RpcResponse();
+                    res.SetResult(t.Result);
 
                     if (success) return res;
 
@@ -79,14 +77,9 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                     // for any
                     var finalType = method.Prototype.ReturnType;
                     var t = method.Prototype.Invoke(method.Controller, args);
-
-                    //var serializer = SerializeMethod.MakeGenericMethod(finalType);
-
-                    //var binary = (byte[]) serializer.Invoke(this, new [] {t});
-                    return new RpcResponse
-                    {
-                        Result = new JRaw(t)
-                    };
+                    
+                    context.Response.SetResult(t);
+                    return context.Response;
                 }
             }
         }

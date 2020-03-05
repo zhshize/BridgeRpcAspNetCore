@@ -25,7 +25,6 @@ namespace BridgeRpc.AspNetCore.Router.Basic
         private readonly HttpContext _httpContext;
         private readonly IServiceProvider _serviceProvider;
         private readonly IRpcHub _hub;
-        private string _clientId;
 
         /// <summary>
         /// If preset, this side will be seen a client, if null, this side will be seen as a server.
@@ -43,17 +42,19 @@ namespace BridgeRpc.AspNetCore.Router.Basic
             {
                 var pipeline = scopedProvider.ServiceProvider.GetService<IPipeline>();
                 var methodProvider = scopedProvider.ServiceProvider.GetService<IRpcMethodProvider>();
-                methodProvider.Path = RoutingPath.Parse(_httpContext.Request.Path);
+                
+                // if http context is null, this side is client.
+                methodProvider.Path = _httpContext == null ? RoutingPath.Parse(ClientId) : RoutingPath.Parse(_httpContext.Request.Path);
+
                 var allMethods = methodProvider.GetAllMethods();
-                IRpcActionContext context = new RpcActionContext
+                var context = scopedProvider.ServiceProvider.GetService<IRpcActionContext>();
+                context.Hub = _hub;
+                context.Request = request;
+                context.Response = new RpcResponse
                 {
-                    Hub = _hub,
-                    Request = request,
-                    Response = new RpcResponse
-                    {
-                        Id = request.Id
-                    }
+                    Id = request.Id
                 };
+                
 
                 var methodName = request.Method;
                 var methods = allMethods.Where(m => GetMethodName(m.Prototype) == methodName).ToList();
@@ -83,9 +84,8 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                 {
                     var method = methods.FirstOrDefault();
                     if (method == null) return context.Response;
-                
+
                     pipeline.ProcessRequestAsync(method, context).Wait();
-                    //var res = _methodInvoker.Call(method, ref context);
 
                     return context.Response;
                 }

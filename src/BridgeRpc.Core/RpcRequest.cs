@@ -6,32 +6,38 @@ namespace BridgeRpc.Core
 {
     public class RpcRequest
     {
-        [JsonProperty("bridgerpc")]
-        public string Version { get; set; } = "1.0";
+        public string Version
+        {
+            get => RawObject["bridgerpc"].ToString();
+            set => RawObject["bridgerpc"] = value;
+        }
         
-        [JsonProperty("id")]
-        public string Id { get; set; }
+        public string Id
+        {
+            get => RawObject["id"].ToString();
+            set => RawObject["id"] = value;
+        }
         
-        [JsonProperty("method")]
-        public string Method { get; set; }
+        public string Method
+        {
+            get => RawObject["method"].ToString();
+            set => RawObject["method"] = value;
+        }
         
-        [JsonProperty("data")]
-        public JRaw Data { get; set; }
+        public object Data => RawObject["data"];
+
+        protected JObject RawObject { get; set; }
         
         public RpcRequest()
         {
-            
+            RawObject = new JObject {["bridgerpc"] = "1.0", ["id"] = "", ["method"] = "", ["data"] = null};
         }
 
         public RpcRequest(string json)
         {
             try
             {
-                var request = FromJsonString(json);
-                Version = request.Version;
-                Id = request.Id;
-                Method = request.Method;
-                Data = request.Data;
+                RawObject = JObject.Parse(json);
             }
             catch (JsonException je)
             {
@@ -45,12 +51,12 @@ namespace BridgeRpc.Core
 
         public T GetParameterFromData<T>(string name)
         {
-            return Data.Type == JTokenType.Object ? Data[name].ToObject<T>() : (T) Data.Value;
+            return RawObject["data"].Type == JTokenType.Object ? RawObject["data"][name].ToObject<T>() : RawObject["data"].Value<T>();
         }
 
         public string ToJson()
         {
-            return JsonConvert.SerializeObject(this);
+            return RawObject.ToString();
         }
 
         public bool IsNotify()
@@ -60,17 +66,28 @@ namespace BridgeRpc.Core
 
         public void SetData<T>(T obj)
         {
-            Data = new JRaw(obj);
+            if (obj is JToken token)
+            {
+                RawObject["data"] = token;
+            }
+            else if (obj is string str)
+            {
+                RawObject["data"] = str;
+            }
+            else
+            {
+                RawObject["data"] = JObject.FromObject(obj);
+            }
         }
 
         public T GetData<T>()
         {
-            return Data.ToObject<T>();
+            return RawObject["data"].ToObject<T>();
         }
         
-        public static RpcRequest FromJsonString(string json)
+        public JToken GetData()
         {
-            return JsonConvert.DeserializeObject<RpcRequest>(json);
+            return RawObject["data"];
         }
     }
 }

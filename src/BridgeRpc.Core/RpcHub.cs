@@ -25,20 +25,20 @@ namespace BridgeRpc.Core
         public event MessageExceptionHandler OnMessageException;
         public event RequestInvokingExceptionHandler OnRequestInvokingException;
 
-        public Task<RpcResponse> RequestAsync(string method, JRaw param, bool throwRpcException = false, TimeSpan? timeout = null)
+        public Task<RpcResponse> RequestAsync(string method, object param, bool throwRpcException = false, TimeSpan? timeout = null)
         {
             return RequestAsync(method, param, timeout.HasValue, throwRpcException, timeout);
         }
 
-        protected Task<RpcResponse> RequestAsync(string method, JRaw param, bool hasTimeout, bool throwRpcException, TimeSpan? timeout)
+        protected Task<RpcResponse> RequestAsync(string method, object param, bool hasTimeout, bool throwRpcException, TimeSpan? timeout)
         {
             var id = Util.Util.RandomString(16);
             var request = new RpcRequest
             {
                 Id = id,
                 Method = method,
-                Data = param
             };
+            request.SetData(param);
 
             var taskSource = new RequestTaskCompletionSource { ThrowRpcException = throwRpcException };
             var task = taskSource.Task;
@@ -61,14 +61,14 @@ namespace BridgeRpc.Core
             return task;
         }
 
-        public void Notify(string method, JRaw param)
+        public void Notify(string method, object param)
         {
             var request = new RpcRequest
             {
                 Id = null,
                 Method = method,
-                Data = param
             };
+            request.SetData(param);
             _socket.Send(Encoding.UTF8.GetBytes(request.ToJson()));
         }
 
@@ -132,7 +132,7 @@ namespace BridgeRpc.Core
                     RpcRequest req;
                     try
                     {
-                        req = RpcRequest.FromJsonString(json);
+                        req = new RpcRequest(json);
                     }
                     catch (Exception e)
                     {
@@ -157,13 +157,15 @@ namespace BridgeRpc.Core
                             var res = new RpcResponse
                             {
                                 Id = req.Id,
-                                Error = new RpcError((int) RpcErrorCode.InternalError, e.Message, null)
                             };
+                            res.SetError<object>((int) RpcErrorCode.InternalError, e.Message, null);
                             _socket.Send(Encoding.UTF8.GetBytes(res.ToJson()));
                         }
-                        catch
+                        catch (Exception inner)
                         {
-                            // error in error handling, ignored...
+                            // error in error handling, Response will NOT be sent
+                            OnMessageException?.Invoke(new AggregateException(e, inner), 
+                                "Error occured inside error handling in RpcHub.Handle(...)");
                         }
                         OnRequestInvokingException?.Invoke(e, e.Message);
                         throw new RpcException(RpcErrorCode.InternalError, e.Message, e);
@@ -174,7 +176,7 @@ namespace BridgeRpc.Core
                     RpcResponse response;
                     try
                     {
-                        response = RpcResponse.FromJsonString(json);
+                        response = new RpcResponse(json);
                     }
                     catch (Exception e)
                     {
