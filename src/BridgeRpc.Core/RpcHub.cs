@@ -100,22 +100,22 @@ namespace BridgeRpc.Core
                 catch (ArgumentOutOfRangeException ae)
                 {
                     OnMessageException?.Invoke(ae, "data index is invalid in Handle(object sender, byte[] data)");
-                    throw new RpcException(RpcErrorCode.ParseError, "Parsing received data error.", ae);
+                    return;
                 }
                 catch (ArgumentNullException ae)
                 {
                     OnMessageException?.Invoke(ae, "data is null in Handle(object sender, byte[] data)");
-                    throw new RpcException(RpcErrorCode.ParseError, "Parsing received data error.", ae);
+                    return;
                 }
                 catch (DecoderFallbackException de)
                 {
                     OnMessageException?.Invoke(de, "Decoding to UTF-8 string failed in Handle(object sender, byte[] data)");
-                    throw new RpcException(RpcErrorCode.ParseError, "Parsing received data error.", de);
+                    return;
                 }
                 catch (ArgumentException ae)
                 {
                     OnMessageException?.Invoke(ae, "Decoding to UTF-8 string failed in Handle(object sender, byte[] data)");
-                    throw new RpcException(RpcErrorCode.ParseError, "Parsing received data error.", ae);
+                    return;
                 }
                 catch (KeyNotFoundException)
                 {
@@ -124,7 +124,7 @@ namespace BridgeRpc.Core
                 catch (Exception e)
                 {
                     OnMessageException?.Invoke(e, "Other internal error");
-                    throw new RpcException(RpcErrorCode.ParseError, "Parsing received data error.", e);
+                    return;
                 }
 
                 if (method != null) // Received data is request
@@ -138,17 +138,34 @@ namespace BridgeRpc.Core
                     {
                         // because request cannot be deserialized, no error object will be sent back
                         OnMessageException?.Invoke(e, e.Message);
-                        throw new RpcException(RpcErrorCode.ParseError, "Parsing request object error.", e);
+                        return;
                     }
 
                     try
                     {
                         var res = OnRequest?.Invoke(req);
-                        if (!req.IsNotify() && res != null)
+                        if (req.IsNotify() || res == null) return;
+                        res.Id = req.Id;
+                        _socket.Send(Encoding.UTF8.GetBytes(res.ToJson()));
+                    }
+                    catch (RpcException e)
+                    {
+                        try // Send error message back
                         {
-                            res.Id = req.Id;
+                            var res = new RpcResponse
+                            {
+                                Id = req.Id,
+                            };
+                            res.SetError<object>(e.ErrorCode, e.Message, e.RpcData);
                             _socket.Send(Encoding.UTF8.GetBytes(res.ToJson()));
                         }
+                        catch (Exception inner)
+                        {
+                            // error in error handling, Response will NOT be sent
+                            OnMessageException?.Invoke(new AggregateException(e, inner), 
+                                "Error occured inside error handling in RpcHub.Handle(...)");
+                        }
+                        OnRequestInvokingException?.Invoke(e, e.Message);
                     }
                     catch (Exception e)
                     {
@@ -168,7 +185,6 @@ namespace BridgeRpc.Core
                                 "Error occured inside error handling in RpcHub.Handle(...)");
                         }
                         OnRequestInvokingException?.Invoke(e, e.Message);
-                        throw new RpcException(RpcErrorCode.InternalError, e.Message, e);
                     }
                 }
                 else // Received data is response
@@ -180,7 +196,9 @@ namespace BridgeRpc.Core
                     }
                     catch (Exception e)
                     {
-                        throw new RpcException(RpcErrorCode.ParseError, "Parsing response object error.", e);
+                        var rpcE = new RpcException(RpcErrorCode.ParseError, "Parsing response object error.", e);
+                        OnMessageException?.Invoke(rpcE, rpcE.Message);
+                        return;
                     }
                     
                     if (response.Id != null && RequestingQueue.ContainsKey(response.Id))

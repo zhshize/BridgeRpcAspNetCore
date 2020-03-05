@@ -58,7 +58,14 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                     {
                         var array = message.ToArray();
                         var memStream = new MemoryStream(array, 0, array.Length);
-                        OnReceived?.Invoke(this, memStream.ToArray());
+                        try
+                        {
+                            OnReceived?.Invoke(this, memStream.ToArray());
+                        }
+                        catch
+                        {
+                            // ignored
+                        }
                     }
 
                     if (result.MessageType == WebSocketMessageType.Close)
@@ -136,7 +143,15 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                 }
                 catch (WebSocketException e) when (e.WebSocketErrorCode == WebSocketError.ConnectionClosedPrematurely)
                 {
-                    OnDisconnect?.Invoke("ConnectionClosedPrematurely");
+                    try
+                    {
+                        OnDisconnect?.Invoke("ConnectionClosedPrematurely");
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+
                     break;
                 }
                 catch (WebSocketException e)
@@ -182,7 +197,14 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                 // Exit normally
             }
 
-            OnDisconnect?.Invoke(statusDescription);
+            try
+            {
+                OnDisconnect?.Invoke(statusDescription);
+            }
+            catch
+            {
+                // ignored
+            }
         }
     }
 }

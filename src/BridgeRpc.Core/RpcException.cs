@@ -14,7 +14,7 @@ namespace BridgeRpc.Core
 
     
     /// <summary>
-    /// Rpc server exception that contains Rpc specfic error info
+    /// Rpc server exception that contains Rpc specific error info
     /// </summary>
     public class RpcException : Exception
     {
@@ -25,13 +25,13 @@ namespace BridgeRpc.Core
         /// <summary>
         /// Custom data attached to the error if needed
         /// </summary>
-        public JRaw RpcData { get; }
+        public object RpcData { get; }
 		
         /// <param name="errorCode">Rpc error code</param>
         /// <param name="message">Error message</param>
         /// <param name="data">Custom data if needed for error response</param>
         /// <param name="innerException">Inner exception (optional)</param>
-        public RpcException(int errorCode, string message, Exception innerException = null, JRaw data = null)
+        public RpcException(int errorCode, string message, Exception innerException = null, object data = null)
             : base(message, innerException)
         {
             ErrorCode = errorCode;
@@ -41,7 +41,7 @@ namespace BridgeRpc.Core
         /// <param name="message">Error message</param>
         /// <param name="data">Custom data if needed for error response</param>
         /// <param name="innerException">Inner exception (optional)</param>
-        public RpcException(RpcErrorCode errorCode, string message, Exception innerException = null, JRaw data = null)
+        public RpcException(RpcErrorCode errorCode, string message, Exception innerException = null, object data = null)
             : this((int)errorCode, message, innerException, data)
         {
         }
