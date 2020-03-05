@@ -53,8 +53,10 @@ namespace BridgeRpc.AspNetCore.Server.Extensions
                         {
                             var socket = (BasicSocket) context.RequestServices.GetRequiredService<ISocket>();
                             socket.SetSocket(websocket);
-                            context.RequestServices.GetRequiredService<BasicRouter>();
-                            bus.InvokeConnected(context, context.RequestServices.GetRequiredService<IRpcHub>());
+                            var router = context.RequestServices.GetRequiredService<BasicRouter>();
+                            var hub = context.RequestServices.GetRequiredService<IRpcHub>();
+                            bus.InvokeConnected(context, hub);
+                            hub.SetRoutingPath(currentPath);
                             await socket.Start();
                             bus.InvokeDisonnected(context);
                         }
