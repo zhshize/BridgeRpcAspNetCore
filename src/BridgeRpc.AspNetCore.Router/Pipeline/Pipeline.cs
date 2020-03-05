@@ -14,6 +14,12 @@ namespace BridgeRpc.AspNetCore.Router.Pipeline
         private readonly GlobalFiltersList _globalFiltersList;
         private readonly IMethodInvoker _methodInvoker;
 
+        /// <summary>
+        /// Create pipeline to handle request with filters
+        /// </summary>
+        /// <param name="serviceProvider">Service provider</param>
+        /// <param name="globalFiltersList">Global filters</param>
+        /// <param name="methodInvoker">Method invoker object</param>
         public Pipeline(IServiceProvider serviceProvider, GlobalFiltersList globalFiltersList,
             IMethodInvoker methodInvoker)
         {
@@ -70,6 +76,12 @@ namespace BridgeRpc.AspNetCore.Router.Pipeline
             return context;
         }
 
+        /// <summary>
+        /// Call filters
+        /// </summary>
+        /// <param name="context">Request handling action context</param>
+        /// <param name="filters">Filters to be called</param>
+        /// <returns>The <see cref="Task"/> object represent the filter calling process</returns>
         protected async Task CallFilters(IRpcActionContext context, List<IRpcFilter> filters)
         {
             var enumerator = filters.GetEnumerator();

@@ -111,6 +111,8 @@ namespace BridgeRpc.Core
         /// <returns>The result object</returns>
         public T GetResult<T>()
         {
+            if (typeof(T) == typeof(JToken))
+                return (T)(object) RawObject.Property("result").Value;
             return RawObject["result"].ToObject<T>();
         }
         

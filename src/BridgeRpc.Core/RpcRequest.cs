@@ -133,6 +133,8 @@ namespace BridgeRpc.Core
         /// <returns>The data object</returns>
         public T GetData<T>()
         {
+            if (typeof(T) == typeof(JToken))
+                return (T)(object) RawObject.Property("data").Value;
             return RawObject["data"].ToObject<T>();
         }
         

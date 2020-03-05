@@ -9,15 +9,14 @@ namespace BridgeRpc.AspNetCore.Router
     public class RpcRouteAttribute : Attribute
     {
         /// <summary>
-        /// Name of the route to be used in the router. If unspecified, will use controller name.
+        /// Routing path to be used in the router. If unspecified, this controller can handle request from any path.
         /// </summary>
         public string RouteName { get; }
 
         /// <summary>
-        /// 
+        /// Set routing path to be used in the router. If unspecified, this controller can handle request from any path.
         /// </summary>
-        /// <param name="routeName">(Optional) Name of the route to be used in the router. If unspecified, will use controller name.</param>
-        /// <param name="routeGroup">(Optional) Name of the group the route is in to allow route filtering per request.</param>
+        /// <param name="routeName">(Optional) Routing path</param>
         public RpcRouteAttribute(string routeName = null)
         {
             RouteName = routeName?.Trim();

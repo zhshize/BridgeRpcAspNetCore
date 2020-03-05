@@ -1,4 +1,5 @@
 using System;
+using Newtonsoft.Json.Linq;
 
 namespace BridgeRpc.AspNetCore.Router
 {
@@ -10,6 +11,10 @@ namespace BridgeRpc.AspNetCore.Router
         /// </summary>
         public string ParameterName { get; }
 
+        /// <summary>
+        /// Specify the parameter name to be retrieved
+        /// </summary>
+        /// <param name="name">Parameter name in request data</param>
         public RpcParamAttribute(string name = null)
         {
             ParameterName = name;
@@ -24,14 +29,21 @@ namespace BridgeRpc.AspNetCore.Router
         /// </summary>
         public Type TypeRequired { get; }
 
+        /// <summary>
+        /// Specify the type that the data in request will be deserialized
+        /// </summary>
+        /// <param name="need">Type to be deserialized</param>
         public RpcDataAttribute(Type need)
         {
             TypeRequired = need;
         }
         
+        /// <summary>
+        /// Specify that the data will be passed as a <see cref="JToken"/> object
+        /// </summary>
         public RpcDataAttribute()
         {
-            TypeRequired = typeof(byte[]);
+            TypeRequired = typeof(JToken);
         }
     }
 }

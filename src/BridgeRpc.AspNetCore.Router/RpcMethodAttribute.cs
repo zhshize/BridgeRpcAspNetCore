@@ -14,7 +14,7 @@ namespace BridgeRpc.AspNetCore.Router
         public string MethodName { get; }
 
         /// <summary>
-        /// 
+        /// Override the method name.
         /// </summary>
         /// <param name="methodName">(Optional) Name of the method to be used in the router.</param>
         public RpcMethodAttribute(string methodName)

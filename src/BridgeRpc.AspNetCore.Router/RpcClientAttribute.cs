@@ -15,7 +15,7 @@ namespace BridgeRpc.AspNetCore.Router
         public string ClientId { get; }
 
         /// <summary>
-        /// 
+        /// Set the client id to handle specified requests.
         /// </summary>
         /// <param name="clientId">(Optional) Client id to be used in the controller.</param>
         public RpcClientAttribute(string clientId = null)
