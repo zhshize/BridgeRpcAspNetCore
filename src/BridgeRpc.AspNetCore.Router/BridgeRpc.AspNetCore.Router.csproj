@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netcoreapp2.2</TargetFramework>
+        <TargetFrameworks>netcoreapp3.1;netstandard2.0</TargetFrameworks>
         <LangVersion>7.1</LangVersion>
         <PackageVersion>0.0.5</PackageVersion>
         <Authors>zhshize</Authors>
@@ -12,14 +12,21 @@
         <RepositoryUrl>https://github.com/zhshize/BridgeRpcAspNetCore</RepositoryUrl>
     </PropertyGroup>
 
+    <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+        <PackageReference Include="Microsoft.AspNetCore" Version="2.1.0" />
+    </ItemGroup>
+
     <ItemGroup>
-      <PackageReference Include="MessagePack" Version="1.7.3.7" />
-      <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
-      <PackageReference Include="BridgeRpc.Core" Version="0.0.5" />
+        <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     </ItemGroup>
     
-    <!--<ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.1.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.0" />
         <ProjectReference Include="../BridgeRpc.Core/BridgeRpc.Core.csproj" />
-    </ItemGroup>-->
+    </ItemGroup>
 </Project>
