@@ -20,7 +20,7 @@ namespace Client
                 var services = serviceScope.ServiceProvider;
 
                 var options = new RpcClientOptions();
-                options.Host = new Uri("ws://140.120.223.135:5000/go");
+                options.Host = new Uri("ws://localhost:5000/go");
                 options.ClientId = "client1";
                 options.ReconnectInterval = TimeSpan.FromSeconds(60);
 
@@ -50,7 +50,6 @@ namespace Client
                             var r = await hub.RequestAsync("greet", "Joe");
                             Console.WriteLine(r.GetResult<string>());
                             await Task.Delay(5000);
-                            hub.OnDisconnect += () => Console.WriteLine("OnDisconnect event from RpcHub.");
                         }
                     };
                     client.OnConnectFailed += e =>
