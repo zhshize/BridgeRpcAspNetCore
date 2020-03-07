@@ -69,7 +69,7 @@ namespace BridgeRpc.AspNetCore.Server.Extensions
                             {
                                 try
                                 {
-                                    await hub.RequestAsync("__rpc_ping", null, true, options.PongTimeout);
+                                    await hub.RequestAsync(".ping", null, true, options.PongTimeout);
                                 }
                                 catch
                                 {

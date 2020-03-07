@@ -24,7 +24,7 @@ namespace BridgeRpc.Core
         public event DisconnectHandler OnDisconnect;
         public event MessageExceptionHandler OnMessageException;
         public event RequestInvokingExceptionHandler OnRequestInvokingException;
-        public event PingHandler OnPing;
+        public event ReservedRequestHandler OnReservedRequest;
 
         public Task<RpcResponse> RequestAsync(string method, object param, bool throwRpcException = false, TimeSpan? timeout = null)
         {
@@ -151,27 +151,9 @@ namespace BridgeRpc.Core
                         return;
                     }
 
-                    // handle ping message
                     try
                     {
-                        if (req.Method == "__rpc_ping")
-                        {
-                            var res = new RpcResponse();
-                            res.Id = req.Id;
-                            _socket.Send(Encoding.UTF8.GetBytes(res.ToJson()));
-                            OnPing?.Invoke(req);
-                            return;
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        OnMessageException?.Invoke(e, e.Message);
-                        return;
-                    }
-                    
-                    try
-                    {
-                        var res = OnRequest?.Invoke(req);
+                        var res = req.Method.StartsWith(".") ? OnReservedRequest?.Invoke(req) : OnRequest?.Invoke(req);
                         if (req.IsNotify() || res == null) return;
                         res.Id = req.Id;
                         _socket.Send(Encoding.UTF8.GetBytes(res.ToJson()));

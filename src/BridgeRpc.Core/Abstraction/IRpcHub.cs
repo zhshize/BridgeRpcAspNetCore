@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace BridgeRpc.Core.Abstraction
 {
     public delegate RpcResponse RequestHandler(RpcRequest request);
-    public delegate void PingHandler(RpcRequest request);
+    public delegate RpcResponse ReservedRequestHandler(RpcRequest request);
     public delegate void DisconnectHandler();
     public delegate void MessageExceptionHandler(Exception e, string message);
     public delegate void RequestInvokingExceptionHandler(Exception e, string message);
@@ -41,9 +41,9 @@ namespace BridgeRpc.Core.Abstraction
         event RequestInvokingExceptionHandler OnRequestInvokingException;
 
         /// <summary>
-        /// Invoke when received a ping message
+        /// Invoke when received a request method name start with "."
         /// </summary>
-        event PingHandler OnPing;
+        event ReservedRequestHandler OnReservedRequest;
 
         /// <summary>
         /// Call other side.
