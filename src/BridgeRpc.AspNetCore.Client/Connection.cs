@@ -21,18 +21,20 @@ namespace BridgeRpc.AspNetCore.Client
         }
 
         public RpcClientOptions Options { get; set; }
+        public bool Reconnect { get; set; } = false;
 
         public event Action<IRpcHub, IServiceProvider> OnConnected;
         public event Action OnDisconnected;
         public event Action<Exception> OnConnectFailed;
+        private bool _needDisconnect = false;
 
         public void Run()
         {
             Task.Run(async () =>
             {
-                while (true)
+                while (_needDisconnect == false)
                 {
-                    var client = Reconnect();
+                    var client = ReconnectSocket();
                     if (client != null)
                     {
                         using (var scope = _scopeFactory.CreateScope())
@@ -72,13 +74,20 @@ namespace BridgeRpc.AspNetCore.Client
                         OnDisconnected?.Invoke();
                     }
 
-                    if (Options.ReconnectInterval.HasValue)
-                        await Task.Delay(Options.ReconnectInterval.Value);
+                    if (Reconnect)
+                    {
+                        if (Options.ReconnectInterval.HasValue)
+                            await Task.Delay(Options.ReconnectInterval.Value);
+                    }
+                    else
+                    {
+                        _needDisconnect = true;
+                    }
                 }
             });
         }
 
-        private ClientWebSocket Reconnect()
+        private ClientWebSocket ReconnectSocket()
         {
             var client = new ClientWebSocket();
             client.Options.KeepAliveInterval = Options.RpcOptions.KeepAliveInterval;
