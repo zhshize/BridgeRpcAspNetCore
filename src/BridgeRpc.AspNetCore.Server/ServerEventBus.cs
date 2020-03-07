@@ -24,7 +24,7 @@ namespace BridgeRpc.AspNetCore.Server
         ///     This method shouldn't be invoke by user.
         /// </summary>
         /// <param name="context"></param>
-        public void InvokeDisonnected(HttpContext context)
+        public void InvokeDisconnected(HttpContext context)
         {
             OnDisconnected?.Invoke(context);
         }

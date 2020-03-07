@@ -80,7 +80,7 @@ namespace BridgeRpc.AspNetCore.Server.Extensions
                             bus.InvokeConnected(context, hub);
                             hub.SetRoutingPath(currentPath);
                             await socket.Start();
-                            bus.InvokeDisonnected(context);
+                            bus.InvokeDisconnected(context);
                         }
                     }
                     else

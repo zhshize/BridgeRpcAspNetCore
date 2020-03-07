@@ -124,7 +124,7 @@ namespace BridgeRpc.AspNetCore.Router.Basic
             return args.ToArray();
         }
 
-        protected static bool IsAsyncMethod(IRpcMethod method)
+        private bool IsAsyncMethod(IRpcMethod method)
         {
             var attrib = method.Prototype.GetCustomAttribute<AsyncStateMachineAttribute>();
             return attrib != null;
