@@ -16,11 +16,6 @@ namespace BridgeRpc.AspNetCore.Router.Basic
         public BasicMethodInvoker(RpcOptions options)
         {
             _options = options;
-            /*SerializeMethod = typeof(MessagePackSerializer)
-                .GetMethods()
-                .First(m => m.Name == nameof(MessagePackSerializer.Serialize) &&
-                            m.IsGenericMethod &&
-                            m.GetParameters().Length == 1);*/
         }
 
         public RpcResponse Call(IRpcMethod method, ref IRpcActionContext context)
@@ -43,14 +38,9 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                 else
                 {
                     // for async Task<any>
-                    var finalType = method.Prototype.ReturnType.GetGenericArguments().First();
-
                     var t = (dynamic) method.Prototype.Invoke(method.Controller, args);
                     var success = (bool) t.Wait(_options.RequestTimeout);
-
-                    //var serializer = SerializeMethod.MakeGenericMethod(finalType);
-
-                    //var binary = (byte[]) serializer.Invoke(this, new [] {t.Result});
+                    
                     var res = new RpcResponse();
                     res.SetResult(t.Result);
 
@@ -74,7 +64,6 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                 else
                 {
                     // for any
-                    var finalType = method.Prototype.ReturnType;
                     var t = method.Prototype.Invoke(method.Controller, args);
                     
                     context.Response.SetResult(t);

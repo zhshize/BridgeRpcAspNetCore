@@ -24,6 +24,7 @@ namespace BridgeRpc.Core
         public event DisconnectHandler OnDisconnect;
         public event MessageExceptionHandler OnMessageException;
         public event RequestInvokingExceptionHandler OnRequestInvokingException;
+        public event ReservedRequestHandler OnReservedRequest;
 
         public Task<RpcResponse> RequestAsync(string method, object param, bool throwRpcException = false, TimeSpan? timeout = null)
         {
@@ -40,7 +41,7 @@ namespace BridgeRpc.Core
             };
             request.SetData(param);
 
-            var taskSource = new RequestTaskCompletionSource { ThrowRpcException = throwRpcException };
+            var taskSource = new RequestTaskCompletionSource {ThrowRpcException = throwRpcException};
             var task = taskSource.Task;
             RequestingQueue.Add(id, taskSource);
 
@@ -53,10 +54,17 @@ namespace BridgeRpc.Core
                 taskSource.SetException(e);
             }
 
-            if (hasTimeout && timeout != null)
-                Task.Run(() => 
-                        Task.Delay(timeout.Value)
-                        .ContinueWith(_ => taskSource.TrySetCanceled()));
+            if (!hasTimeout || !timeout.HasValue)
+            {
+                timeout = TimeSpan.FromSeconds(10);
+            }
+            Task.Run(() =>
+                Task.Delay(timeout.Value)
+                    .ContinueWith(_ =>
+                    {
+                        RequestingQueue.Remove(id);
+                        return taskSource.TrySetCanceled();
+                    }));
 
             return task;
         }
@@ -109,12 +117,14 @@ namespace BridgeRpc.Core
                 }
                 catch (DecoderFallbackException de)
                 {
-                    OnMessageException?.Invoke(de, "Decoding to UTF-8 string failed in Handle(object sender, byte[] data)");
+                    OnMessageException?.Invoke(de,
+                        "Decoding to UTF-8 string failed in Handle(object sender, byte[] data)");
                     return;
                 }
                 catch (ArgumentException ae)
                 {
-                    OnMessageException?.Invoke(ae, "Decoding to UTF-8 string failed in Handle(object sender, byte[] data)");
+                    OnMessageException?.Invoke(ae,
+                        "Decoding to UTF-8 string failed in Handle(object sender, byte[] data)");
                     return;
                 }
                 catch (KeyNotFoundException)
@@ -143,7 +153,7 @@ namespace BridgeRpc.Core
 
                     try
                     {
-                        var res = OnRequest?.Invoke(req);
+                        var res = req.Method.StartsWith(".") ? OnReservedRequest?.Invoke(req) : OnRequest?.Invoke(req);
                         if (req.IsNotify() || res == null) return;
                         res.Id = req.Id;
                         _socket.Send(Encoding.UTF8.GetBytes(res.ToJson()));
@@ -162,9 +172,10 @@ namespace BridgeRpc.Core
                         catch (Exception inner)
                         {
                             // error in error handling, Response will NOT be sent
-                            OnMessageException?.Invoke(new AggregateException(e, inner), 
+                            OnMessageException?.Invoke(new AggregateException(e, inner),
                                 "Error occured inside error handling in RpcHub.Handle(...)");
                         }
+
                         OnRequestInvokingException?.Invoke(e, e.Message);
                     }
                     catch (Exception e)
@@ -181,9 +192,10 @@ namespace BridgeRpc.Core
                         catch (Exception inner)
                         {
                             // error in error handling, Response will NOT be sent
-                            OnMessageException?.Invoke(new AggregateException(e, inner), 
+                            OnMessageException?.Invoke(new AggregateException(e, inner),
                                 "Error occured inside error handling in RpcHub.Handle(...)");
                         }
+
                         OnRequestInvokingException?.Invoke(e, e.Message);
                     }
                 }
@@ -200,7 +212,7 @@ namespace BridgeRpc.Core
                         OnMessageException?.Invoke(rpcE, rpcE.Message);
                         return;
                     }
-                    
+
                     if (response.Id != null && RequestingQueue.ContainsKey(response.Id))
                     {
                         RequestingQueue[response.Id].SetResult(response);

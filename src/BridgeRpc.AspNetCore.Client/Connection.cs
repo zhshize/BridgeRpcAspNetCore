@@ -3,8 +3,10 @@ using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 using BridgeRpc.AspNetCore.Router.Basic;
+using BridgeRpc.Core;
 using BridgeRpc.Core.Abstraction;
 using Microsoft.Extensions.DependencyInjection;
+using Timer = System.Timers.Timer;
 
 namespace BridgeRpc.AspNetCore.Client
 {
@@ -41,13 +43,21 @@ namespace BridgeRpc.AspNetCore.Client
                             {
                                 var router = scope.ServiceProvider.GetService<BasicRouter>();
                                 router.ClientId = Options.ClientId;
-                                var handler = scope.ServiceProvider.GetService<IRpcHub>();
+                                var hub = scope.ServiceProvider.GetService<IRpcHub>();
+                                hub.OnReservedRequest += request => request.Method == ".ping" ? new RpcResponse() : null;
+                                var pingTimer = new Timer()
+                                {
+                                    Interval = Options.PingTimeout.TotalMilliseconds,
+                                    AutoReset = false
+                                };
+                                pingTimer.Elapsed += (sender, args) => hub.Disconnect();
+                                pingTimer.Enabled = true;
 #pragma warning disable 4014
                                 Task.Run(() =>
 #pragma warning restore 4014
                                 {
                                     // ReSharper disable once AccessToDisposedClosure
-                                    OnConnected?.Invoke(handler, scope.ServiceProvider);
+                                    OnConnected?.Invoke(hub, scope.ServiceProvider);
                                 });
                                 await socket.Start();
                             }
@@ -69,6 +79,7 @@ namespace BridgeRpc.AspNetCore.Client
         private ClientWebSocket Reconnect()
         {
             var client = new ClientWebSocket();
+            client.Options.KeepAliveInterval = Options.RpcOptions.KeepAliveInterval;
             try
             {
                 client.ConnectAsync(Options.Host, CancellationToken.None).Wait();

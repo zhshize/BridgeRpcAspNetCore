@@ -1,6 +1,8 @@
 using System.Threading.Tasks;
+using System.Timers;
 using BridgeRpc.AspNetCore.Router;
 using BridgeRpc.AspNetCore.Router.Basic;
+using BridgeRpc.Core;
 using BridgeRpc.Core.Abstraction;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -11,7 +13,7 @@ using Microsoft.Extensions.Logging;
 namespace BridgeRpc.AspNetCore.Server.Extensions
 {
     public delegate void ServerEventHandler(ref ServerEventBus bus);
-    
+
     public static class BridgeRpcServerBuilderExtension
     {
         /// <summary>
@@ -20,7 +22,8 @@ namespace BridgeRpc.AspNetCore.Server.Extensions
         /// <param name="app"></param>
         /// <param name="handler">Register event handler</param>
         /// <returns></returns>
-        public static IApplicationBuilder UseBridgeRpcWithBasic(this IApplicationBuilder app, ServerEventHandler handler)
+        public static IApplicationBuilder UseBridgeRpcWithBasic(this IApplicationBuilder app,
+            ServerEventHandler handler)
         {
             var wsOptions = app.ApplicationServices.GetService<WebSocketOptions>();
 
@@ -42,7 +45,7 @@ namespace BridgeRpc.AspNetCore.Server.Extensions
                             isAllowed = true;
                             break;
                         }
-                    
+
                     var bus = new ServerEventBus();
                     handler(ref bus);
 
@@ -50,10 +53,31 @@ namespace BridgeRpc.AspNetCore.Server.Extensions
                     {
                         using (var websocket = await context.WebSockets.AcceptWebSocketAsync())
                         {
+                            var options = context.RequestServices.GetService<RpcServerOptions>();
                             var socket = (BasicSocket) context.RequestServices.GetRequiredService<ISocket>();
                             socket.SetSocket(websocket);
                             var router = context.RequestServices.GetRequiredService<BasicRouter>();
                             var hub = context.RequestServices.GetRequiredService<IRpcHub>();
+                            
+                            // ping-pong
+                            var pingTimer = new Timer()
+                            {
+                                Interval = options.PingInterval.TotalMilliseconds,
+                                AutoReset = true
+                            };
+                            pingTimer.Elapsed += async (sender, args) =>
+                            {
+                                try
+                                {
+                                    await hub.RequestAsync(".ping", null, true, options.PongTimeout);
+                                }
+                                catch
+                                {
+                                    hub.Disconnect();
+                                }
+                            };
+                            pingTimer.Enabled = true;
+
                             bus.InvokeConnected(context, hub);
                             hub.SetRoutingPath(currentPath);
                             await socket.Start();
@@ -63,7 +87,8 @@ namespace BridgeRpc.AspNetCore.Server.Extensions
                     else
                     {
                         bus.InvokeNotAllowed(context);
-                        logger.LogInformation("A web socket connection is reject by BridgeRpc because the path is not allowed.");
+                        logger.LogInformation(
+                            "A web socket connection is reject by BridgeRpc because the path is not allowed.");
                         await next();
                     }
                 }
@@ -83,7 +108,7 @@ namespace BridgeRpc.AspNetCore.Server.Extensions
         /// <returns></returns>
         public static IApplicationBuilder UseBridgeRpcWithBasic(this IApplicationBuilder app)
         {
-            return app.UseBridgeRpcWithBasic((ref ServerEventBus bus) => { } );
+            return app.UseBridgeRpcWithBasic((ref ServerEventBus bus) => { });
         }
 
         /// <summary>
