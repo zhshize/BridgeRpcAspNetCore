@@ -18,17 +18,17 @@ namespace Client
             using (var serviceScope = host.Services.CreateScope())
             {
                 var services = serviceScope.ServiceProvider;
-                
+
                 var options = new RpcClientOptions();
                 options.Host = new Uri("ws://140.120.223.135:5000/go");
                 options.ClientId = "client1";
                 options.ReconnectInterval = TimeSpan.FromSeconds(60);
-                
+
                 options.RpcOptions.AllowedOrigins = new List<string> {"*"};
                 options.RpcOptions.BufferSize = 16 * 1024;
                 options.RpcOptions.KeepAliveInterval = TimeSpan.FromSeconds(4);
                 options.RpcOptions.RequestTimeout = TimeSpan.FromSeconds(4);
-                
+
                 var client = new RpcIndependentScopeClient(serviceScope, options);
 
                 try
@@ -71,8 +71,10 @@ namespace Client
             host.Run();
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args)
+        {
+            return WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>();
+        }
     }
 }

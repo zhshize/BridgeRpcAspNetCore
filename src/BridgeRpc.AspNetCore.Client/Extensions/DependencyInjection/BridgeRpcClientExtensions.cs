@@ -12,21 +12,20 @@ namespace BridgeRpc.AspNetCore.Client.Extensions.DependencyInjection
 {
     public static class BridgeRpcClientExtensions
     {
-        
         public delegate void OptionsProvider(ref RpcClientOptions options);
-        
+
         public static void AddBridgeRpcClient(this IServiceCollection services, OptionsProvider optionProvider)
         {
             services.AddHttpContextAccessor();
-            
+
             var o = new RpcClientOptions();
             optionProvider(ref o);
 
             services.AddScoped<SocketProvider>();
 
-            services.AddScoped<RpcOptions>(provider => o.RpcOptions);
-            services.AddScoped<RpcClientOptions>(provider => o);
-            
+            services.AddScoped(provider => o.RpcOptions);
+            services.AddScoped(provider => o);
+
             services.AddScoped<GlobalFiltersList>();
             services.AddScoped<IPipeline, Pipeline>();
             services.AddScoped<Connection>();
@@ -41,10 +40,10 @@ namespace BridgeRpc.AspNetCore.Client.Extensions.DependencyInjection
 
             AddRpcControllers(services);
         }
-        
+
         public static void AddBridgeRpcClient(this IServiceCollection services)
         {
-            services.AddBridgeRpcClient((ref RpcClientOptions options) => { } );
+            services.AddBridgeRpcClient((ref RpcClientOptions options) => { });
         }
 
         public static void AddRpcControllers(IServiceCollection services)
@@ -60,11 +59,11 @@ namespace BridgeRpc.AspNetCore.Client.Extensions.DependencyInjection
             {
                 var addService = typeof(ServiceCollectionServiceExtensions)
                     .GetMethods()
-                    .First(m => m.Name == nameof(ServiceCollectionServiceExtensions.AddScoped) && 
+                    .First(m => m.Name == nameof(ServiceCollectionServiceExtensions.AddScoped) &&
                                 m.IsGenericMethod &&
                                 m.GetGenericArguments().Length == 2)
                     .MakeGenericMethod(typeof(RpcController), controllerType);
-                
+
                 addService.Invoke(null, new object[] {services});
             }
         }

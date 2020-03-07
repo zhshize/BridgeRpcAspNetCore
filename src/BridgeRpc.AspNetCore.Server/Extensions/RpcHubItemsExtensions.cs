@@ -6,7 +6,7 @@ namespace BridgeRpc.AspNetCore.Server.Extensions
     public static class RpcHubItemsExtensions
     {
         public const string ItemNameRoutingPath = "__RoutingPath";
-        
+
         /**
          * Get routing path.
          */
@@ -16,7 +16,7 @@ namespace BridgeRpc.AspNetCore.Server.Extensions
                 return (RoutingPath) hub.Items[ItemNameRoutingPath];
             return null;
         }
-        
+
         /**
          * Set routing path.
          *

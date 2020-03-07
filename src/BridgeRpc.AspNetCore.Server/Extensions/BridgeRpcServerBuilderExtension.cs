@@ -2,7 +2,6 @@ using System.Threading.Tasks;
 using System.Timers;
 using BridgeRpc.AspNetCore.Router;
 using BridgeRpc.AspNetCore.Router.Basic;
-using BridgeRpc.Core;
 using BridgeRpc.Core.Abstraction;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -17,7 +16,7 @@ namespace BridgeRpc.AspNetCore.Server.Extensions
     public static class BridgeRpcServerBuilderExtension
     {
         /// <summary>
-        /// Directly use BridgeRpc with basic configuration. WebSocketOptions will be controlled by this method.
+        ///     Directly use BridgeRpc with basic configuration. WebSocketOptions will be controlled by this method.
         /// </summary>
         /// <param name="app"></param>
         /// <param name="handler">Register event handler</param>
@@ -58,9 +57,9 @@ namespace BridgeRpc.AspNetCore.Server.Extensions
                             socket.SetSocket(websocket);
                             var router = context.RequestServices.GetRequiredService<BasicRouter>();
                             var hub = context.RequestServices.GetRequiredService<IRpcHub>();
-                            
+
                             // ping-pong
-                            var pingTimer = new Timer()
+                            var pingTimer = new Timer
                             {
                                 Interval = options.PingInterval.TotalMilliseconds,
                                 AutoReset = true
@@ -102,7 +101,7 @@ namespace BridgeRpc.AspNetCore.Server.Extensions
         }
 
         /// <summary>
-        /// Directly use BridgeRpc with basic configuration. WebSocketOptions will be controlled by this method.
+        ///     Directly use BridgeRpc with basic configuration. WebSocketOptions will be controlled by this method.
         /// </summary>
         /// <param name="app"></param>
         /// <returns></returns>
@@ -112,15 +111,14 @@ namespace BridgeRpc.AspNetCore.Server.Extensions
         }
 
         /// <summary>
-        /// Start BridgeRpc connection in a controller. Because user maps routing directly, so this method will not
-        /// check the routing path.
+        ///     Start BridgeRpc connection in a controller. Because user maps routing directly, so this method will not
+        ///     check the routing path.
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
         public static async Task<IActionResult> EnableBridgeRpc(HttpContext context)
         {
             if (context.WebSockets.IsWebSocketRequest)
-            {
                 using (var websocket = await context.WebSockets.AcceptWebSocketAsync())
                 {
                     var socket = (BasicSocket) context.RequestServices.GetRequiredService<ISocket>();
@@ -128,7 +126,6 @@ namespace BridgeRpc.AspNetCore.Server.Extensions
                     context.RequestServices.GetRequiredService<BasicRouter>();
                     await socket.Start();
                 }
-            }
 
             return new EmptyResult();
         }

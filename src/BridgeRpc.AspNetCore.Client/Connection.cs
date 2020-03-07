@@ -13,13 +13,14 @@ namespace BridgeRpc.AspNetCore.Client
     public class Connection
     {
         private readonly IServiceScopeFactory _scopeFactory;
-        public RpcClientOptions Options { get; set; }
 
         public Connection(IServiceScopeFactory scopeFactory, RpcClientOptions options)
         {
             _scopeFactory = scopeFactory;
             Options = options;
         }
+
+        public RpcClientOptions Options { get; set; }
 
         public event Action<IRpcHub, IServiceProvider> OnConnected;
         public event Action OnDisconnected;
@@ -44,8 +45,9 @@ namespace BridgeRpc.AspNetCore.Client
                                 var router = scope.ServiceProvider.GetService<BasicRouter>();
                                 router.ClientId = Options.ClientId;
                                 var hub = scope.ServiceProvider.GetService<IRpcHub>();
-                                hub.OnReservedRequest += request => request.Method == ".ping" ? new RpcResponse() : null;
-                                var pingTimer = new Timer()
+                                hub.OnReservedRequest += request =>
+                                    request.Method == ".ping" ? new RpcResponse() : null;
+                                var pingTimer = new Timer
                                 {
                                     Interval = Options.PingTimeout.TotalMilliseconds,
                                     AutoReset = false

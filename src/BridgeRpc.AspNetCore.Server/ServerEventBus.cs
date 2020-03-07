@@ -11,7 +11,7 @@ namespace BridgeRpc.AspNetCore.Server
         public event Action<HttpContext> OnNotAllowed;
 
         /// <summary>
-        /// This method shouldn't be invoke by user.
+        ///     This method shouldn't be invoke by user.
         /// </summary>
         /// <param name="context"></param>
         /// <param name="hub"></param>
@@ -19,18 +19,18 @@ namespace BridgeRpc.AspNetCore.Server
         {
             OnConnected?.Invoke(context, hub);
         }
-        
+
         /// <summary>
-        /// This method shouldn't be invoke by user.
+        ///     This method shouldn't be invoke by user.
         /// </summary>
         /// <param name="context"></param>
         public void InvokeDisonnected(HttpContext context)
         {
             OnDisconnected?.Invoke(context);
         }
-        
+
         /// <summary>
-        /// This method shouldn't be invoke by user.
+        ///     This method shouldn't be invoke by user.
         /// </summary>
         /// <param name="context"></param>
         public void InvokeNotAllowed(HttpContext context)

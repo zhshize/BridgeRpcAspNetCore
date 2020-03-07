@@ -12,6 +12,9 @@ namespace BridgeRpc.Core
     {
         private readonly ISocket _socket;
 
+        protected readonly Dictionary<string, RequestTaskCompletionSource> RequestingQueue
+            = new Dictionary<string, RequestTaskCompletionSource>();
+
         public RpcHub(ISocket socket)
         {
             _socket = socket;
@@ -26,18 +29,36 @@ namespace BridgeRpc.Core
         public event RequestInvokingExceptionHandler OnRequestInvokingException;
         public event ReservedRequestHandler OnReservedRequest;
 
-        public Task<RpcResponse> RequestAsync(string method, object param, bool throwRpcException = false, TimeSpan? timeout = null)
+        public Task<RpcResponse> RequestAsync(string method, object param, bool throwRpcException = false,
+            TimeSpan? timeout = null)
         {
             return RequestAsync(method, param, timeout.HasValue, throwRpcException, timeout);
         }
 
-        protected Task<RpcResponse> RequestAsync(string method, object param, bool hasTimeout, bool throwRpcException, TimeSpan? timeout)
+        public void Notify(string method, object param)
+        {
+            var request = new RpcRequest
+            {
+                Id = null,
+                Method = method
+            };
+            request.SetData(param);
+            _socket.Send(Encoding.UTF8.GetBytes(request.ToJson()));
+        }
+
+        public void Disconnect()
+        {
+            _socket.Disconnect();
+        }
+
+        protected Task<RpcResponse> RequestAsync(string method, object param, bool hasTimeout, bool throwRpcException,
+            TimeSpan? timeout)
         {
             var id = Util.Util.RandomString(16);
             var request = new RpcRequest
             {
                 Id = id,
-                Method = method,
+                Method = method
             };
             request.SetData(param);
 
@@ -54,10 +75,7 @@ namespace BridgeRpc.Core
                 taskSource.SetException(e);
             }
 
-            if (!hasTimeout || !timeout.HasValue)
-            {
-                timeout = TimeSpan.FromSeconds(10);
-            }
+            if (!hasTimeout || !timeout.HasValue) timeout = TimeSpan.FromSeconds(10);
             Task.Run(() =>
                 Task.Delay(timeout.Value)
                     .ContinueWith(_ =>
@@ -68,25 +86,6 @@ namespace BridgeRpc.Core
 
             return task;
         }
-
-        public void Notify(string method, object param)
-        {
-            var request = new RpcRequest
-            {
-                Id = null,
-                Method = method,
-            };
-            request.SetData(param);
-            _socket.Send(Encoding.UTF8.GetBytes(request.ToJson()));
-        }
-
-        public void Disconnect()
-        {
-            _socket.Disconnect();
-        }
-
-        protected readonly Dictionary<string, RequestTaskCompletionSource> RequestingQueue
-            = new Dictionary<string, RequestTaskCompletionSource>();
 
         protected void Handle(object sender, byte[] data)
         {
@@ -164,9 +163,9 @@ namespace BridgeRpc.Core
                         {
                             var res = new RpcResponse
                             {
-                                Id = req.Id,
+                                Id = req.Id
                             };
-                            res.SetError<object>(e.ErrorCode, e.Message, e.RpcData);
+                            res.SetError(e.ErrorCode, e.Message, e.RpcData);
                             _socket.Send(Encoding.UTF8.GetBytes(res.ToJson()));
                         }
                         catch (Exception inner)
@@ -184,7 +183,7 @@ namespace BridgeRpc.Core
                         {
                             var res = new RpcResponse
                             {
-                                Id = req.Id,
+                                Id = req.Id
                             };
                             res.SetError<object>((int) RpcErrorCode.InternalError, e.Message, null);
                             _socket.Send(Encoding.UTF8.GetBytes(res.ToJson()));
@@ -214,9 +213,7 @@ namespace BridgeRpc.Core
                     }
 
                     if (response.Id != null && RequestingQueue.ContainsKey(response.Id))
-                    {
                         RequestingQueue[response.Id].SetResult(response);
-                    }
                 }
             });
         }

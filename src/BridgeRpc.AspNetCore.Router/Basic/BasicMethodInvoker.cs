@@ -40,7 +40,7 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                     // for async Task<any>
                     var t = (dynamic) method.Prototype.Invoke(method.Controller, args);
                     var success = (bool) t.Wait(_options.RequestTimeout);
-                    
+
                     var res = new RpcResponse();
                     res.SetResult(t.Result);
 
@@ -50,25 +50,22 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                     throw new RpcException(RpcErrorCode.InternalError, timeoutException.Message, timeoutException);
                 }
             }
-            else
+
+            if (method.Prototype.ReturnType == typeof(RpcResponse))
+                // for RpcResponse
+                return (RpcResponse) method.Prototype.Invoke(method.Controller, args);
+
+            if (method.Prototype.ReturnType == typeof(void))
             {
-                if (method.Prototype.ReturnType == typeof(RpcResponse))
-                {
-                    // for RpcResponse
-                    return (RpcResponse) method.Prototype.Invoke(method.Controller, args);
-                }
-                else if (method.Prototype.ReturnType == typeof(void))
-                {
-                    return context.Response;
-                }
-                else
-                {
-                    // for any
-                    var t = method.Prototype.Invoke(method.Controller, args);
-                    
-                    context.Response.SetResult(t);
-                    return context.Response;
-                }
+                return context.Response;
+            }
+
+            {
+                // for any
+                var t = method.Prototype.Invoke(method.Controller, args);
+
+                context.Response.SetResult(t);
+                return context.Response;
             }
         }
 
@@ -109,18 +106,18 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                     var paramName = paramAttr.ParameterName;
                     if (string.IsNullOrEmpty(paramName))
                         paramName = p.Name;
-                    
+
                     var getParamMethod = typeof(RpcRequest).GetMethod("GetParameterFromData");
                     if (getParamMethod == null) continue;
                     var methodRef = getParamMethod.MakeGenericMethod(p.ParameterType);
-                    args.Add(methodRef.Invoke(request, new object[] { paramName }));
+                    args.Add(methodRef.Invoke(request, new object[] {paramName}));
                 }
                 else
                 {
                     var getParamMethod = typeof(RpcRequest).GetMethod("GetParameterFromData");
                     if (getParamMethod == null) continue;
                     var methodRef = getParamMethod.MakeGenericMethod(p.ParameterType);
-                    args.Add(methodRef.Invoke(request, new object[] { p.Name }));
+                    args.Add(methodRef.Invoke(request, new object[] {p.Name}));
                 }
             }
 

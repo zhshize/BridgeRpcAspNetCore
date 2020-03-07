@@ -5,47 +5,13 @@ using Newtonsoft.Json.Linq;
 namespace BridgeRpc.Core
 {
     /// <summary>
-    /// Represent a RPC Response object.
-    /// This class is an accessing interface of raw JObject.
+    ///     Represent a RPC Response object.
+    ///     This class is an accessing interface of raw JObject.
     /// </summary>
     public class RpcResponse
     {
         /// <summary>
-        /// RPC protocol version of this response object.
-        /// </summary>
-        public string Version
-        {
-            get => RawObject["bridgerpc"].ToString();
-            set => RawObject["bridgerpc"] = value;
-        }
-        
-        /// <summary>
-        /// Identification of this response equals to the corresponding request.
-        /// </summary>
-        public string Id
-        {
-            get => RawObject["id"].ToString();
-            set => RawObject["id"] = value;
-        }
-        
-        /// <summary>
-        /// Execution result by the request handler.
-        /// If you want to set result, use <see cref="SetResult{T}"/>
-        /// </summary>
-        public object Result => RawObject["result"];
-        
-        /// <summary>
-        /// Presets when error occurred in request handling pipeline.
-        /// </summary>
-        public RpcError Error { get; private set; }
-        
-        /// <summary>
-        /// Raw JSON Object.
-        /// </summary>
-        protected JObject RawObject { get; set; }
-
-        /// <summary>
-        /// Create a new RpcResponse object with default protocol version, empty id, null result, null error.
+        ///     Create a new RpcResponse object with default protocol version, empty id, null result, null error.
         /// </summary>
         public RpcResponse()
         {
@@ -53,7 +19,7 @@ namespace BridgeRpc.Core
         }
 
         /// <summary>
-        /// Create a new RpcResponse from JSON string.
+        ///     Create a new RpcResponse from JSON string.
         /// </summary>
         /// <param name="json">JSON string represent a rpc response</param>
         /// <exception cref="RpcException">Parsing error or internal error occurred when parsing JSON string</exception>
@@ -75,7 +41,41 @@ namespace BridgeRpc.Core
         }
 
         /// <summary>
-        /// Serialize this response to JSON.
+        ///     RPC protocol version of this response object.
+        /// </summary>
+        public string Version
+        {
+            get => RawObject["bridgerpc"].ToString();
+            set => RawObject["bridgerpc"] = value;
+        }
+
+        /// <summary>
+        ///     Identification of this response equals to the corresponding request.
+        /// </summary>
+        public string Id
+        {
+            get => RawObject["id"].ToString();
+            set => RawObject["id"] = value;
+        }
+
+        /// <summary>
+        ///     Execution result by the request handler.
+        ///     If you want to set result, use <see cref="SetResult{T}" />
+        /// </summary>
+        public object Result => RawObject["result"];
+
+        /// <summary>
+        ///     Presets when error occurred in request handling pipeline.
+        /// </summary>
+        public RpcError Error { get; private set; }
+
+        /// <summary>
+        ///     Raw JSON Object.
+        /// </summary>
+        protected JObject RawObject { get; set; }
+
+        /// <summary>
+        ///     Serialize this response to JSON.
         /// </summary>
         /// <returns>JSON string</returns>
         public string ToJson()
@@ -84,40 +84,34 @@ namespace BridgeRpc.Core
         }
 
         /// <summary>
-        /// Set result to be responded.
+        ///     Set result to be responded.
         /// </summary>
         /// <param name="obj">Object to be responded</param>
         /// <typeparam name="T">Type of responded data</typeparam>
         public void SetResult<T>(T obj)
         {
             if (obj is JToken token)
-            {
                 RawObject["result"] = token;
-            }
             else if (obj is string str)
-            {
                 RawObject["result"] = str;
-            }
             else
-            {
                 RawObject["result"] = JObject.FromObject(obj);
-            }
         }
 
         /// <summary>
-        /// Get result in specified type
+        ///     Get result in specified type
         /// </summary>
         /// <typeparam name="T">The type that the result will be deserialized and returned</typeparam>
         /// <returns>The result object</returns>
         public T GetResult<T>()
         {
             if (typeof(T) == typeof(JToken))
-                return (T)(object) RawObject.Property("result").Value;
+                return (T) (object) RawObject.Property("result").Value;
             return RawObject["result"].ToObject<T>();
         }
-        
+
         /// <summary>
-        /// Get result in <see cref="JToken"/> type
+        ///     Get result in <see cref="JToken" /> type
         /// </summary>
         /// <returns>The result object</returns>
         public JToken GetResult()
@@ -126,7 +120,7 @@ namespace BridgeRpc.Core
         }
 
         /// <summary>
-        /// Set the error status.
+        ///     Set the error status.
         /// </summary>
         /// <param name="code">An integer to indicate the error</param>
         /// <param name="message">A string to describe the error</param>
@@ -138,9 +132,9 @@ namespace BridgeRpc.Core
             RawObject["error"] = err;
             SyncErrorObject();
         }
-        
+
         /// <summary>
-        /// Clear the error status
+        ///     Clear the error status
         /// </summary>
         public void ClearError()
         {
@@ -150,8 +144,9 @@ namespace BridgeRpc.Core
 
         private void SyncErrorObject()
         {
-            Error = RawObject.Property("error").Value.Type == JTokenType.Null ? 
-                null : new RpcError(RawObject.Property("error").Value as JObject);
+            Error = RawObject.Property("error").Value.Type == JTokenType.Null
+                ? null
+                : new RpcError(RawObject.Property("error").Value as JObject);
         }
     }
 }

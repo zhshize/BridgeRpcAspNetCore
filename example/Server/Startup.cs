@@ -28,25 +28,22 @@ namespace Server
             {
                 options.RoutingOptions.AllowAny = true;
                 options.RoutingOptions.AllowedPaths = new List<RoutingPath>();
-                
+
                 options.RpcOptions.AllowedOrigins = new List<string> {"*"};
                 options.RpcOptions.BufferSize = 16 * 1024;
                 options.RpcOptions.KeepAliveInterval = TimeSpan.FromSeconds(4);
                 options.RpcOptions.RequestTimeout = TimeSpan.FromSeconds(4);
             });
         }
+
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
-            {
                 app.UseDeveloperExceptionPage();
-            }
             else
-            {
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
-            }
 
             app.UseBridgeRpcWithBasic((ref ServerEventBus bus) =>
             {
@@ -61,7 +58,8 @@ namespace Server
                     //hub.Notify("notify", MessagePackSerializer.Serialize("hi"));
                     hub.OnDisconnect += () => Console.WriteLine("OnDisconnect event from RpcHub.");
                 };
-                bus.OnNotAllowed += context => Console.WriteLine("Server not allowed this path: " + context.Request.Path);
+                bus.OnNotAllowed += context =>
+                    Console.WriteLine("Server not allowed this path: " + context.Request.Path);
                 bus.OnDisconnected += _ => Console.WriteLine("Disconnected");
             });
 
