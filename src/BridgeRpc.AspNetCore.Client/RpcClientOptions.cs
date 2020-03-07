@@ -32,6 +32,11 @@ namespace BridgeRpc.AspNetCore.Client
         public TimeSpan? ReconnectInterval { get; set; } = TimeSpan.FromSeconds(60);
         
         /// <summary>
+        /// Server sends ping, if pinging time out, auto disconnect.
+        /// </summary>
+        public TimeSpan PingTimeout { get; set; } = TimeSpan.FromSeconds(60);
+        
+        /// <summary>
         /// Client id to specify which controllers to handle requests
         /// </summary>
         public string ClientId { get; set; } = "client1";

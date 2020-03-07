@@ -19,10 +19,11 @@ namespace BridgeRpc.Core
         public int BufferSize { get; set; } = 16 * 1024;
         
         /// <summary>
-        /// The frequency at which to send Ping/Pong keep-alive control frames. (default 120 seconds)
+        /// How frequently to send "ping" frames to the client to ensure proxies keep the connection open.
+        /// (default 120 seconds)
         /// </summary>
         public TimeSpan KeepAliveInterval { get; set; } = TimeSpan.FromSeconds(120);
-        
+
         /// <summary>
         /// Browser allowed cross site origins. (default [ "*" ])
         /// </summary>

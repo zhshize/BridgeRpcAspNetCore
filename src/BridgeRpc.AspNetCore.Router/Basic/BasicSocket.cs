@@ -187,9 +187,9 @@ namespace BridgeRpc.AspNetCore.Router.Basic
             WebSocketCloseStatus closeStatus = WebSocketCloseStatus.NormalClosure,
             string statusDescription = "")
         {
-            _cancellation.Cancel();
             try
             {
+                _cancellation.Cancel();
                 await _socket.CloseAsync(closeStatus, statusDescription, CancellationToken.None);
             }
             catch (Exception)

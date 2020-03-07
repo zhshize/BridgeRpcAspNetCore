@@ -20,14 +20,14 @@ namespace Client
                 var services = serviceScope.ServiceProvider;
                 
                 var options = new RpcClientOptions();
-                options.Host = new Uri("ws://localhost:5000/go");
+                options.Host = new Uri("ws://140.120.223.135:5000/go");
                 options.ClientId = "client1";
                 options.ReconnectInterval = TimeSpan.FromSeconds(60);
                 
                 options.RpcOptions.AllowedOrigins = new List<string> {"*"};
                 options.RpcOptions.BufferSize = 16 * 1024;
-                options.RpcOptions.KeepAliveInterval = TimeSpan.FromSeconds(120);
-                options.RpcOptions.RequestTimeout = TimeSpan.FromSeconds(15);
+                options.RpcOptions.KeepAliveInterval = TimeSpan.FromSeconds(4);
+                options.RpcOptions.RequestTimeout = TimeSpan.FromSeconds(4);
                 
                 var client = new RpcIndependentScopeClient(serviceScope, options);
 
@@ -36,6 +36,11 @@ namespace Client
                     client.OnConnected += async (hub, provider) =>
                     {
                         hub.OnMessageException += (exception, message) =>
+                        {
+                            Console.WriteLine(message);
+                            Console.WriteLine(exception);
+                        };
+                        hub.OnRequestInvokingException += (exception, message) =>
                         {
                             Console.WriteLine(message);
                             Console.WriteLine(exception);

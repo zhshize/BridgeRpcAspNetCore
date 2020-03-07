@@ -31,8 +31,8 @@ namespace Server
                 
                 options.RpcOptions.AllowedOrigins = new List<string> {"*"};
                 options.RpcOptions.BufferSize = 16 * 1024;
-                options.RpcOptions.KeepAliveInterval = TimeSpan.FromSeconds(120);
-                options.RpcOptions.RequestTimeout = TimeSpan.FromSeconds(15);
+                options.RpcOptions.KeepAliveInterval = TimeSpan.FromSeconds(4);
+                options.RpcOptions.RequestTimeout = TimeSpan.FromSeconds(4);
             });
         }
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -52,6 +52,11 @@ namespace Server
             {
                 bus.OnConnected += (context, hub) =>
                 {
+                    hub.OnRequestInvokingException += (exception, message) =>
+                    {
+                        Console.WriteLine(message);
+                        Console.WriteLine(exception);
+                    };
                     Console.WriteLine("Connected");
                     //hub.Notify("notify", MessagePackSerializer.Serialize("hi"));
                     hub.OnDisconnect += () => Console.WriteLine("OnDisconnect event from RpcHub.");
