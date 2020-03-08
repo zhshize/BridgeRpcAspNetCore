@@ -28,6 +28,9 @@ namespace Server
             {
                 options.RoutingOptions.AllowAny = true;
                 options.RoutingOptions.AllowedPaths = new List<RoutingPath>();
+                
+                options.PingInterval = TimeSpan.FromSeconds(10);
+                options.PongTimeout = TimeSpan.FromSeconds(3);
 
                 options.RpcOptions.AllowedOrigins = new List<string> {"*"};
                 options.RpcOptions.BufferSize = 16 * 1024;

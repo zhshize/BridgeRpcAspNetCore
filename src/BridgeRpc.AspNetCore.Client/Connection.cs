@@ -47,23 +47,30 @@ namespace BridgeRpc.AspNetCore.Client
                                 var router = scope.ServiceProvider.GetService<BasicRouter>();
                                 router.ClientId = Options.ClientId;
                                 var hub = scope.ServiceProvider.GetService<IRpcHub>();
-                                hub.OnReservedRequest += request =>
-                                    request.Method == ".ping" ? new RpcResponse() : null;
-                                var pingTimer = new Timer
+                                using (var pingTimer = new Timer(Options.PingTimeout.TotalMilliseconds))
                                 {
-                                    Interval = Options.PingTimeout.TotalMilliseconds,
-                                    AutoReset = false
-                                };
-                                pingTimer.Elapsed += (sender, args) => hub.Disconnect();
-                                pingTimer.Enabled = true;
-#pragma warning disable 4014
-                                Task.Run(() =>
+                                    pingTimer.AutoReset = false;
+
+                                    RpcResponse HandlePing(RpcRequest req)
+                                    {
+                                        if (req.Method != ".ping") return null;
+                                        pingTimer.Stop();
+                                        pingTimer.Start();
+                                        return new RpcResponse();
+                                    }
+                                    
+                                    pingTimer.Elapsed += (sender, args) => hub.Disconnect();
+                                    hub.OnReservedRequest += HandlePing;
+                                    pingTimer.Disposed += (sender, args) => hub.OnReservedRequest -= HandlePing;
+                                    pingTimer.Enabled = true;
+                                    Task.Run(() =>
 #pragma warning restore 4014
-                                {
-                                    // ReSharper disable once AccessToDisposedClosure
-                                    OnConnected?.Invoke(hub, scope.ServiceProvider);
-                                });
-                                await socket.Start();
+                                    {
+                                        // ReSharper disable once AccessToDisposedClosure
+                                        OnConnected?.Invoke(hub, scope.ServiceProvider);
+                                    });
+                                    await socket.Start();
+                                }
                             }
                             catch (Exception e)
                             {

@@ -114,7 +114,9 @@ namespace BridgeRpc.Core
         /// <typeparam name="T">Type of sent data</typeparam>
         public void SetData<T>(T obj)
         {
-            if (obj is JToken token)
+            if (obj == null)
+                RawObject.Property("data").Value = JValue.CreateNull();
+            else if (obj is JToken token)
                 RawObject["data"] = token;
             else if (obj is string str)
                 RawObject["data"] = str;

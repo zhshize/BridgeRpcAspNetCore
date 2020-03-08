@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using System.Timers;
 using BridgeRpc.AspNetCore.Router;
@@ -59,27 +60,27 @@ namespace BridgeRpc.AspNetCore.Server.Extensions
                             var hub = context.RequestServices.GetRequiredService<IRpcHub>();
 
                             // ping-pong
-                            var pingTimer = new Timer
+                            using (var pingTimer = new Timer(options.PingInterval.TotalMilliseconds))
                             {
-                                Interval = options.PingInterval.TotalMilliseconds,
-                                AutoReset = true
-                            };
-                            pingTimer.Elapsed += async (sender, args) =>
-                            {
-                                try
+                                pingTimer.AutoReset = true;
+                                pingTimer.Elapsed += async (sender, args) =>
                                 {
-                                    await hub.RequestAsync(".ping", null, true, options.PongTimeout);
-                                }
-                                catch
-                                {
-                                    hub.Disconnect();
-                                }
-                            };
-                            pingTimer.Enabled = true;
+                                    try
+                                    {
+                                        await hub.RequestAsync(".ping", null, true, options.PongTimeout);
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        hub.Disconnect();
+                                    }
+                                };
+                                pingTimer.Enabled = true;
 
-                            bus.InvokeConnected(context, hub);
-                            hub.SetRoutingPath(currentPath);
-                            await socket.Start();
+                                bus.InvokeConnected(context, hub);
+                                hub.SetRoutingPath(currentPath);
+                                await socket.Start();
+                            }
+
                             bus.InvokeDisconnected(context);
                         }
                     }
