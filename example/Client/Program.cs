@@ -23,6 +23,7 @@ namespace Client
                 options.Host = new Uri("ws://localhost:5000/go");
                 options.ClientId = "client1";
                 options.ReconnectInterval = TimeSpan.FromSeconds(60);
+                options.PingTimeout = TimeSpan.FromSeconds(60);
 
                 options.RpcOptions.AllowedOrigins = new List<string> {"*"};
                 options.RpcOptions.BufferSize = 16 * 1024;
