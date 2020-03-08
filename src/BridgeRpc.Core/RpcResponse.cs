@@ -90,7 +90,9 @@ namespace BridgeRpc.Core
         /// <typeparam name="T">Type of responded data</typeparam>
         public void SetResult<T>(T obj)
         {
-            if (obj is JToken token)
+            if (obj == null)
+                RawObject.Property("result").Value = JValue.CreateNull();
+            else if (obj is JToken token)
                 RawObject["result"] = token;
             else if (obj is string str)
                 RawObject["result"] = str;
