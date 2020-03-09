@@ -27,6 +27,11 @@ namespace BridgeRpc.AspNetCore.Client
         public Uri Host { get; set; } = new Uri("ws://localhost");
 
         /// <summary>
+        ///     Indicate whether reconnect to server after disconnected or not
+        /// </summary>
+        public bool Reconnect { get; set; } = false;
+
+        /// <summary>
         ///     Reconnect interval
         /// </summary>
         public TimeSpan? ReconnectInterval { get; set; } = TimeSpan.FromSeconds(60);

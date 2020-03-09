@@ -25,15 +25,12 @@ namespace BridgeRpc.AspNetCore.Client
         public event Action OnDisconnected;
         public event Action<Exception> OnConnectFailed;
 
-        public bool Reconnect { get; set; } = false;
-
         public void Start()
         {
             var services = _scope.ServiceProvider;
 
             var connection = services.GetRequiredService<Connection>();
             if (Options != null) connection.Options = Options;
-            connection.Reconnect = Reconnect;
             connection.OnConnected += (hub, provider) => OnConnected?.Invoke(hub, provider);
             connection.OnDisconnected += () => OnDisconnected?.Invoke();
             connection.OnConnectFailed += e => OnConnectFailed?.Invoke(e);

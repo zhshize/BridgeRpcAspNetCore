@@ -21,8 +21,6 @@ namespace BridgeRpc.AspNetCore.Client
         }
 
         public RpcClientOptions Options { get; set; }
-        public bool Reconnect { get; set; } = false;
-
         public event Action<IRpcHub, IServiceProvider> OnConnected;
         public event Action OnDisconnected;
         public event Action<Exception> OnConnectFailed;
@@ -81,7 +79,7 @@ namespace BridgeRpc.AspNetCore.Client
                         OnDisconnected?.Invoke();
                     }
 
-                    if (Reconnect)
+                    if (Options.Reconnect)
                     {
                         if (Options.ReconnectInterval.HasValue)
                             await Task.Delay(Options.ReconnectInterval.Value);
