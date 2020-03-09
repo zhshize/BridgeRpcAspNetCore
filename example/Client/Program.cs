@@ -47,18 +47,18 @@ namespace Client
                             Console.WriteLine(message);
                             Console.WriteLine(exception);
                         };
-                        while (true)
+                        try
                         {
-                            try
+                            while (true)
                             {
                                 var r = await hub.RequestAsync("greet", "Joe");
                                 Console.WriteLine(r.GetResult<string>());
                                 await Task.Delay(5000);
                             }
-                            catch
-                            {
-                                // ignore
-                            }
+                        }
+                        catch
+                        {
+                            // ignore
                         }
                     };
                     client.OnConnectFailed += e =>
