@@ -186,8 +186,8 @@ namespace BridgeRpc.AspNetCore.Router.Basic
         {
             try
             {
-                _cancellation.Cancel();
                 await _socket.CloseAsync(closeStatus, statusDescription, CancellationToken.None);
+                _cancellation.Cancel();
             }
             catch (Exception)
             {
