@@ -63,7 +63,7 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                 try
                 {
                     var (result, message) = await ReceiveFullMessage();
-                    if (result.MessageType == WebSocketMessageType.Binary)
+                    if (result.MessageType == WebSocketMessageType.Text)
                     {
                         var array = message.ToArray();
                         var memStream = new MemoryStream(array, 0, array.Length);
@@ -137,7 +137,7 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                     {
                         var sendBuffer = new ArraySegment<byte>(message, 0, message.Length);
 
-                        await _socket.SendAsync(sendBuffer, WebSocketMessageType.Binary, true,
+                        await _socket.SendAsync(sendBuffer, WebSocketMessageType.Text, true,
                             _cancellation.Token);
                     }
                     else
