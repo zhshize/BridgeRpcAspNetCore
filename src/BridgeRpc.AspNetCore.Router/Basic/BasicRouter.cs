@@ -12,6 +12,10 @@ namespace BridgeRpc.AspNetCore.Router.Basic
 {
     public class BasicRouter
     {
+        private readonly HttpContext _httpContext;
+        private readonly IRpcHub _hub;
+        private readonly IServiceProvider _serviceProvider;
+
         public BasicRouter(IServiceProvider serviceProvider, IRpcHub hub, IHttpContextAccessor httpContextAccessor)
         {
             _serviceProvider = serviceProvider;
@@ -21,17 +25,13 @@ namespace BridgeRpc.AspNetCore.Router.Basic
             _hub.OnRequest += Handle;
         }
 
-        private readonly HttpContext _httpContext;
-        private readonly IServiceProvider _serviceProvider;
-        private readonly IRpcHub _hub;
-
         /// <summary>
-        /// If preset, this side will be seen a client, if null, this side will be seen as a server.
+        ///     If preset, this side will be seen a client, if null, this side will be seen as a server.
         /// </summary>
         public string ClientId { get; set; } = "";
 
         /// <summary>
-        /// If request is notification, all matched method will be invoked, if not, the first matched method will 
+        ///     If request is notification, all matched method will be invoked, if not, the first matched method will
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
@@ -41,9 +41,11 @@ namespace BridgeRpc.AspNetCore.Router.Basic
             {
                 var pipeline = scopedProvider.ServiceProvider.GetService<IPipeline>();
                 var methodProvider = scopedProvider.ServiceProvider.GetService<IRpcMethodProvider>();
-                
+
                 // if http context is null, this side is client.
-                methodProvider.Path = _httpContext == null ? RoutingPath.Parse(ClientId) : RoutingPath.Parse(_httpContext.Request.Path);
+                methodProvider.Path = _httpContext == null
+                    ? RoutingPath.Parse(ClientId)
+                    : RoutingPath.Parse(_httpContext.Request.Path);
 
                 var allMethods = methodProvider.GetAllMethods();
                 var context = scopedProvider.ServiceProvider.GetService<IRpcActionContext>();
@@ -53,7 +55,7 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                 {
                     Id = request.Id
                 };
-                
+
 
                 var methodName = request.Method;
                 var methods = allMethods.Where(m => GetMethodName(m.Prototype) == methodName).ToList();
@@ -72,14 +74,12 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                 if (request.IsNotify())
                 {
                     foreach (var method in methods)
-                    {
                         pipeline.ProcessRequestAsync(method, context).Wait();
-                        //_methodInvoker.Notify(method, ref context);
-                    }
+                    //_methodInvoker.Notify(method, ref context);
 
                     return null;
                 }
-                else
+
                 {
                     var method = methods.FirstOrDefault();
                     if (method == null) return context.Response;

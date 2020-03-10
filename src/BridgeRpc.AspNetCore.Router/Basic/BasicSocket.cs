@@ -13,7 +13,15 @@ namespace BridgeRpc.AspNetCore.Router.Basic
 {
     public class BasicSocket : ISocket
     {
+        private readonly CancellationTokenSource _cancellation = new CancellationTokenSource();
         private readonly RpcOptions _options;
+
+        /// <summary>
+        ///     Concurrent queue for messages will be sent
+        /// </summary>
+        protected readonly ConcurrentQueue<byte[]> SendQueue;
+
+        private WebSocket _socket;
 
         public BasicSocket(RpcOptions options)
         {
@@ -21,24 +29,26 @@ namespace BridgeRpc.AspNetCore.Router.Basic
             SendQueue = new ConcurrentQueue<byte[]>();
         }
 
+        public event OnReceivedEventHandler OnReceived;
+        public event Action<string> OnDisconnect;
+
+        public void Send(byte[] data)
+        {
+            SendQueue.Enqueue(data);
+        }
+
+        public void Disconnect()
+        {
+            DisconnectAsync().Wait();
+        }
+
         public void SetSocket(WebSocket socket)
         {
             _socket = socket;
         }
-        
-        private WebSocket _socket;
-        private readonly CancellationTokenSource _cancellation = new CancellationTokenSource();
-
-        public event OnReceivedEventHandler OnReceived;
-        public event Action<string> OnDisconnect;
 
         /// <summary>
-        /// Concurrent queue for messages will be sent
-        /// </summary>
-        protected readonly ConcurrentQueue<byte[]> SendQueue;
-
-        /// <summary>
-        /// Start data transfer.
+        ///     Start data transfer.
         /// </summary>
         /// <returns>When socket closed</returns>
         public async Task Start()
@@ -47,14 +57,13 @@ namespace BridgeRpc.AspNetCore.Router.Basic
             var send = Task.Run(StartSend);
 
             WebSocketReceiveResult closeResult = null;
-            WebSocketCloseStatus closeStatus = WebSocketCloseStatus.NormalClosure;
+            var closeStatus = WebSocketCloseStatus.NormalClosure;
 
             while (!_cancellation.IsCancellationRequested)
-            {
                 try
                 {
                     var (result, message) = await ReceiveFullMessage();
-                    if (result.MessageType == WebSocketMessageType.Binary)
+                    if (result.MessageType == WebSocketMessageType.Text)
                     {
                         var array = message.ToArray();
                         var memStream = new MemoryStream(array, 0, array.Length);
@@ -93,13 +102,13 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                     Console.WriteLine("Other error when receiving: ");
                     Console.WriteLine(e);
                 }
-            }
+
             _cancellation.Cancel();
             await send;
             if (closeResult?.CloseStatus != null) closeStatus = (WebSocketCloseStatus) closeResult.CloseStatus;
             await DisconnectAsync(closeStatus, closeResult?.CloseStatusDescription);
         }
-        
+
         private async Task<(WebSocketReceiveResult, IEnumerable<byte>)> ReceiveFullMessage()
         {
             WebSocketReceiveResult response;
@@ -116,20 +125,19 @@ namespace BridgeRpc.AspNetCore.Router.Basic
         }
 
         /// <summary>
-        /// Send data when <see cref="SendQueue">_sendQueue</see> has data.
+        ///     Send data when <see cref="SendQueue">_sendQueue</see> has data.
         /// </summary>
         /// <returns></returns>
         protected async Task StartSend()
         {
             while (!_cancellation.IsCancellationRequested)
-            {
                 try
                 {
                     if (SendQueue.TryDequeue(out var message))
                     {
-                        var sendBuffer = new ArraySegment<Byte>(message, 0, message.Length);
+                        var sendBuffer = new ArraySegment<byte>(message, 0, message.Length);
 
-                        await _socket.SendAsync(sendBuffer, WebSocketMessageType.Binary, true,
+                        await _socket.SendAsync(sendBuffer, WebSocketMessageType.Text, true,
                             _cancellation.Token);
                     }
                     else
@@ -164,21 +172,10 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                     Console.WriteLine("Other error when sending: ");
                     Console.WriteLine(e);
                 }
-            }
         }
-        
-        public void Send(byte[] data)
-        {
-            SendQueue.Enqueue(data);
-        }
-        
-        public void Disconnect()
-        {
-            DisconnectAsync().Wait();
-        }
-        
+
         /// <summary>
-        /// Disconnect this socket.
+        ///     Disconnect this socket.
         /// </summary>
         /// <param name="closeStatus"></param>
         /// <param name="statusDescription"></param>
@@ -187,10 +184,10 @@ namespace BridgeRpc.AspNetCore.Router.Basic
             WebSocketCloseStatus closeStatus = WebSocketCloseStatus.NormalClosure,
             string statusDescription = "")
         {
-            _cancellation.Cancel();
             try
             {
                 await _socket.CloseAsync(closeStatus, statusDescription, CancellationToken.None);
+                _cancellation.Cancel();
             }
             catch (Exception)
             {

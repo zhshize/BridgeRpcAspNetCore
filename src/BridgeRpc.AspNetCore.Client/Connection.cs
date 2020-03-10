@@ -3,15 +3,16 @@ using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 using BridgeRpc.AspNetCore.Router.Basic;
+using BridgeRpc.Core;
 using BridgeRpc.Core.Abstraction;
 using Microsoft.Extensions.DependencyInjection;
+using Timer = System.Timers.Timer;
 
 namespace BridgeRpc.AspNetCore.Client
 {
     public class Connection
     {
         private readonly IServiceScopeFactory _scopeFactory;
-        public RpcClientOptions Options { get; set; }
 
         public Connection(IServiceScopeFactory scopeFactory, RpcClientOptions options)
         {
@@ -19,17 +20,19 @@ namespace BridgeRpc.AspNetCore.Client
             Options = options;
         }
 
+        public RpcClientOptions Options { get; set; }
         public event Action<IRpcHub, IServiceProvider> OnConnected;
         public event Action OnDisconnected;
         public event Action<Exception> OnConnectFailed;
+        private bool _needDisconnect = false;
 
         public void Run()
         {
             Task.Run(async () =>
             {
-                while (true)
+                while (_needDisconnect == false)
                 {
-                    var client = Reconnect();
+                    var client = ReconnectSocket();
                     if (client != null)
                     {
                         using (var scope = _scopeFactory.CreateScope())
@@ -41,15 +44,31 @@ namespace BridgeRpc.AspNetCore.Client
                             {
                                 var router = scope.ServiceProvider.GetService<BasicRouter>();
                                 router.ClientId = Options.ClientId;
-                                var handler = scope.ServiceProvider.GetService<IRpcHub>();
-#pragma warning disable 4014
-                                Task.Run(() =>
-#pragma warning restore 4014
+                                var hub = scope.ServiceProvider.GetService<IRpcHub>();
+                                using (var pingTimer = new Timer(Options.PingTimeout.TotalMilliseconds))
                                 {
-                                    // ReSharper disable once AccessToDisposedClosure
-                                    OnConnected?.Invoke(handler, scope.ServiceProvider);
-                                });
-                                await socket.Start();
+                                    pingTimer.AutoReset = false;
+
+                                    RpcResponse HandlePing(RpcRequest req)
+                                    {
+                                        if (req.Method != ".ping") return null;
+                                        pingTimer.Stop();
+                                        pingTimer.Start();
+                                        return new RpcResponse();
+                                    }
+                                    
+                                    pingTimer.Elapsed += (sender, args) => hub.Disconnect();
+                                    hub.OnReservedRequest += HandlePing;
+                                    pingTimer.Disposed += (sender, args) => hub.OnReservedRequest -= HandlePing;
+                                    pingTimer.Enabled = true;
+                                    Task.Run(() =>
+#pragma warning restore 4014
+                                    {
+                                        // ReSharper disable once AccessToDisposedClosure
+                                        OnConnected?.Invoke(hub, scope.ServiceProvider);
+                                    });
+                                    await socket.Start();
+                                }
                             }
                             catch (Exception e)
                             {
@@ -60,15 +79,23 @@ namespace BridgeRpc.AspNetCore.Client
                         OnDisconnected?.Invoke();
                     }
 
-                    if (Options.ReconnectInterval.HasValue)
-                        await Task.Delay(Options.ReconnectInterval.Value);
+                    if (Options.Reconnect)
+                    {
+                        if (Options.ReconnectInterval.HasValue)
+                            await Task.Delay(Options.ReconnectInterval.Value);
+                    }
+                    else
+                    {
+                        _needDisconnect = true;
+                    }
                 }
             });
         }
 
-        private ClientWebSocket Reconnect()
+        private ClientWebSocket ReconnectSocket()
         {
             var client = new ClientWebSocket();
+            client.Options.KeepAliveInterval = Options.RpcOptions.KeepAliveInterval;
             try
             {
                 client.ConnectAsync(Options.Host, CancellationToken.None).Wait();

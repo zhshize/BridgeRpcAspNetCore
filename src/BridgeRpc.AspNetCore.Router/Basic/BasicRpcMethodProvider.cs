@@ -9,7 +9,7 @@ namespace BridgeRpc.AspNetCore.Router.Basic
     public class BasicRpcMethodProvider : IRpcMethodProvider
     {
         private readonly IServiceProvider _serviceProvider;
-        private List<RpcController> _controllers;
+        private readonly List<RpcController> _controllers;
 
         public BasicRpcMethodProvider(IServiceProvider serviceProvider, IRpcControllerProvider controllerProvider)
         {
@@ -25,7 +25,6 @@ namespace BridgeRpc.AspNetCore.Router.Basic
             var methods = new List<IRpcMethod>();
 
             if (ClientId == null) // this side is seen as a server
-            {
                 foreach (var controller in _controllers)
                 {
                     var attribute = controller.GetType().GetCustomAttribute<RpcRouteAttribute>(true);
@@ -38,9 +37,7 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                             all.Select(m => new RpcMethod {Prototype = m, Controller = controller}));
                     }
                 }
-            }
             else // as client
-            {
                 foreach (var controller in _controllers)
                 {
                     var attribute = controller.GetType().GetCustomAttribute<RpcClientAttribute>(true);
@@ -50,10 +47,9 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                         var all = controller.GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance)
                             .Where(m => m.DeclaringType != typeof(object));
                         methods.AddRange(
-                            all.Select(m => new RpcMethod() {Prototype = m, Controller = controller}));
+                            all.Select(m => new RpcMethod {Prototype = m, Controller = controller}));
                     }
                 }
-            }
 
 
             return methods;

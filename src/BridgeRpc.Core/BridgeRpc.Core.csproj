@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netcoreapp2.2</TargetFramework>
-        <LangVersion>7.1</LangVersion>
-        <PackageVersion>0.0.5</PackageVersion>
+        <TargetFrameworks>netstandard2.1;netcoreapp3.1</TargetFrameworks>
+        <LangVersion>7.3</LangVersion>
+        <PackageVersion>1.0.0</PackageVersion>
         <Authors>zhshize</Authors>
         <Description>RPC framework based on WebSocket and MessagePack for ASP.net Core</Description>
         <Copyright>Copyright © 2019 by zhshize</Copyright>

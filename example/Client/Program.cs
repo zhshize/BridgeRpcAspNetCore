@@ -18,17 +18,19 @@ namespace Client
             using (var serviceScope = host.Services.CreateScope())
             {
                 var services = serviceScope.ServiceProvider;
-                
+
                 var options = new RpcClientOptions();
                 options.Host = new Uri("ws://localhost:5000/go");
                 options.ClientId = "client1";
-                options.ReconnectInterval = TimeSpan.FromSeconds(60);
-                
+                options.Reconnect = true;
+                options.ReconnectInterval = TimeSpan.FromSeconds(6);
+                options.PingTimeout = TimeSpan.FromSeconds(60);
+
                 options.RpcOptions.AllowedOrigins = new List<string> {"*"};
                 options.RpcOptions.BufferSize = 16 * 1024;
-                options.RpcOptions.KeepAliveInterval = TimeSpan.FromSeconds(120);
-                options.RpcOptions.RequestTimeout = TimeSpan.FromSeconds(15);
-                
+                options.RpcOptions.KeepAliveInterval = TimeSpan.FromSeconds(4);
+                options.RpcOptions.RequestTimeout = TimeSpan.FromSeconds(4);
+
                 var client = new RpcIndependentScopeClient(serviceScope, options);
 
                 try
@@ -40,12 +42,23 @@ namespace Client
                             Console.WriteLine(message);
                             Console.WriteLine(exception);
                         };
-                        while (true)
+                        hub.OnRequestInvokingException += (exception, message) =>
                         {
-                            var r = await hub.RequestAsync("greet", "Joe");
-                            Console.WriteLine(r.GetResult<string>());
-                            await Task.Delay(5000);
-                            hub.OnDisconnect += () => Console.WriteLine("OnDisconnect event from RpcHub.");
+                            Console.WriteLine(message);
+                            Console.WriteLine(exception);
+                        };
+                        try
+                        {
+                            while (true)
+                            {
+                                var r = await hub.RequestAsync("greet", "Joe");
+                                Console.WriteLine(r.GetResult<string>());
+                                await Task.Delay(5000);
+                            }
+                        }
+                        catch
+                        {
+                            // ignore
                         }
                     };
                     client.OnConnectFailed += e =>
@@ -66,8 +79,10 @@ namespace Client
             host.Run();
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args)
+        {
+            return WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>();
+        }
     }
 }

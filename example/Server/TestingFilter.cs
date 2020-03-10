@@ -14,13 +14,13 @@ namespace Server
         {
             _message = message;
         }
-        
+
         public IRpcFilter CreateInstance(IServiceProvider serviceProvider)
         {
             return new TestingFilter(_message);
         }
     }
-    
+
     public class TestingFilter : IRpcFilter
     {
         private readonly string _message;
@@ -29,7 +29,7 @@ namespace Server
         {
             _message = message;
         }
-        
+
         public async Task OnActionExecutionAsync(IRpcActionContext context, Func<Task> next)
         {
             Console.WriteLine(_message);

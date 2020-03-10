@@ -11,21 +11,12 @@ namespace BridgeRpc.Core
         InternalError = -10
     }
 
-    
+
     /// <summary>
-    /// Rpc server exception that contains Rpc specific error info
+    ///     Rpc server exception that contains Rpc specific error info
     /// </summary>
     public class RpcException : Exception
     {
-        /// <summary>
-        /// Rpc error code that corresponds to the documented integer codes
-        /// </summary>
-        public int ErrorCode { get; }
-        /// <summary>
-        /// Custom data attached to the error if needed
-        /// </summary>
-        public object RpcData { get; }
-		
         /// <param name="errorCode">Rpc error code</param>
         /// <param name="message">Error message</param>
         /// <param name="data">Custom data if needed for error response</param>
@@ -36,22 +27,30 @@ namespace BridgeRpc.Core
             ErrorCode = errorCode;
             RpcData = data;
         }
+
         /// <param name="errorCode">Rpc error code</param>
         /// <param name="message">Error message</param>
         /// <param name="data">Custom data if needed for error response</param>
         /// <param name="innerException">Inner exception (optional)</param>
         public RpcException(RpcErrorCode errorCode, string message, Exception innerException = null, object data = null)
-            : this((int)errorCode, message, innerException, data)
+            : this((int) errorCode, message, innerException, data)
         {
         }
+
+        /// <summary>
+        ///     Rpc error code that corresponds to the documented integer codes
+        /// </summary>
+        public int ErrorCode { get; }
+
+        /// <summary>
+        ///     Custom data attached to the error if needed
+        /// </summary>
+        public object RpcData { get; }
 
         public RpcError ToRpcError(bool includeServerErrors)
         {
             var message = Message;
-            if (includeServerErrors)
-            {
-                message += Environment.NewLine + "Exception: " + InnerException;
-            }
+            if (includeServerErrors) message += Environment.NewLine + "Exception: " + InnerException;
             return new RpcError(ErrorCode, message, RpcData);
         }
     }
