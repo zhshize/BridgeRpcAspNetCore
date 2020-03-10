@@ -5,7 +5,7 @@ namespace BridgeRpc.AspNetCore.Router.Abstraction
     public interface IMethodInvoker
     {
         /// <summary>
-        /// Try matching parameter and invoke method by request.
+        ///     Try matching parameter and invoke method by request.
         /// </summary>
         /// <param name="method"></param>
         /// <param name="context"></param>
@@ -13,7 +13,7 @@ namespace BridgeRpc.AspNetCore.Router.Abstraction
         RpcResponse Call(IRpcMethod method, ref IRpcActionContext context);
 
         /// <summary>
-        /// Try matching parameter and invoke method by notification request.
+        ///     Try matching parameter and invoke method by notification request.
         /// </summary>
         /// <param name="method"></param>
         /// <param name="context"></param>

@@ -16,11 +16,6 @@ namespace BridgeRpc.AspNetCore.Router.Basic
         public BasicMethodInvoker(RpcOptions options)
         {
             _options = options;
-            /*SerializeMethod = typeof(MessagePackSerializer)
-                .GetMethods()
-                .First(m => m.Name == nameof(MessagePackSerializer.Serialize) &&
-                            m.IsGenericMethod &&
-                            m.GetParameters().Length == 1);*/
         }
 
         public RpcResponse Call(IRpcMethod method, ref IRpcActionContext context)
@@ -43,14 +38,9 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                 else
                 {
                     // for async Task<any>
-                    var finalType = method.Prototype.ReturnType.GetGenericArguments().First();
-
                     var t = (dynamic) method.Prototype.Invoke(method.Controller, args);
                     var success = (bool) t.Wait(_options.RequestTimeout);
 
-                    //var serializer = SerializeMethod.MakeGenericMethod(finalType);
-
-                    //var binary = (byte[]) serializer.Invoke(this, new [] {t.Result});
                     var res = new RpcResponse();
                     res.SetResult(t.Result);
 
@@ -60,26 +50,22 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                     throw new RpcException(RpcErrorCode.InternalError, timeoutException.Message, timeoutException);
                 }
             }
-            else
+
+            if (method.Prototype.ReturnType == typeof(RpcResponse))
+                // for RpcResponse
+                return (RpcResponse) method.Prototype.Invoke(method.Controller, args);
+
+            if (method.Prototype.ReturnType == typeof(void))
             {
-                if (method.Prototype.ReturnType == typeof(RpcResponse))
-                {
-                    // for RpcResponse
-                    return (RpcResponse) method.Prototype.Invoke(method.Controller, args);
-                }
-                else if (method.Prototype.ReturnType == typeof(void))
-                {
-                    return context.Response;
-                }
-                else
-                {
-                    // for any
-                    var finalType = method.Prototype.ReturnType;
-                    var t = method.Prototype.Invoke(method.Controller, args);
-                    
-                    context.Response.SetResult(t);
-                    return context.Response;
-                }
+                return context.Response;
+            }
+
+            {
+                // for any
+                var t = method.Prototype.Invoke(method.Controller, args);
+
+                context.Response.SetResult(t);
+                return context.Response;
             }
         }
 
@@ -120,25 +106,25 @@ namespace BridgeRpc.AspNetCore.Router.Basic
                     var paramName = paramAttr.ParameterName;
                     if (string.IsNullOrEmpty(paramName))
                         paramName = p.Name;
-                    
+
                     var getParamMethod = typeof(RpcRequest).GetMethod("GetParameterFromData");
                     if (getParamMethod == null) continue;
                     var methodRef = getParamMethod.MakeGenericMethod(p.ParameterType);
-                    args.Add(methodRef.Invoke(request, new object[] { paramName }));
+                    args.Add(methodRef.Invoke(request, new object[] {paramName}));
                 }
                 else
                 {
                     var getParamMethod = typeof(RpcRequest).GetMethod("GetParameterFromData");
                     if (getParamMethod == null) continue;
                     var methodRef = getParamMethod.MakeGenericMethod(p.ParameterType);
-                    args.Add(methodRef.Invoke(request, new object[] { p.Name }));
+                    args.Add(methodRef.Invoke(request, new object[] {p.Name}));
                 }
             }
 
             return args.ToArray();
         }
 
-        protected static bool IsAsyncMethod(IRpcMethod method)
+        private bool IsAsyncMethod(IRpcMethod method)
         {
             var attrib = method.Prototype.GetCustomAttribute<AsyncStateMachineAttribute>();
             return attrib != null;

@@ -10,12 +10,12 @@ namespace BridgeRpc.AspNetCore.Router.Pipeline
 {
     public class Pipeline : IPipeline
     {
-        private readonly IServiceProvider _serviceProvider;
         private readonly GlobalFiltersList _globalFiltersList;
         private readonly IMethodInvoker _methodInvoker;
+        private readonly IServiceProvider _serviceProvider;
 
         /// <summary>
-        /// Create pipeline to handle request with filters
+        ///     Create pipeline to handle request with filters
         /// </summary>
         /// <param name="serviceProvider">Service provider</param>
         /// <param name="globalFiltersList">Global filters</param>
@@ -77,11 +77,11 @@ namespace BridgeRpc.AspNetCore.Router.Pipeline
         }
 
         /// <summary>
-        /// Call filters
+        ///     Call filters
         /// </summary>
         /// <param name="context">Request handling action context</param>
         /// <param name="filters">Filters to be called</param>
-        /// <returns>The <see cref="Task"/> object represent the filter calling process</returns>
+        /// <returns>The <see cref="Task" /> object represent the filter calling process</returns>
         protected async Task CallFilters(IRpcActionContext context, List<IRpcFilter> filters)
         {
             var enumerator = filters.GetEnumerator();
@@ -89,10 +89,7 @@ namespace BridgeRpc.AspNetCore.Router.Pipeline
 
             async Task NextFilter()
             {
-                if (enumerator.MoveNext())
-                {
-                    await enumerator.Current.OnActionExecutionAsync(context, NextFilter);
-                }
+                if (enumerator.MoveNext()) await enumerator.Current.OnActionExecutionAsync(context, NextFilter);
             }
 
             await filters[0].OnActionExecutionAsync(context, NextFilter);

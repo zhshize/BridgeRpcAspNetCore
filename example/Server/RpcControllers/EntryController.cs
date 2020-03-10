@@ -10,12 +10,6 @@ namespace Server.RpcControllers
     [TestingFilter("before action filter: 2 at EntryController")]
     public class EntryController : RpcController
     {
-        public EntryController()
-        {
-
-        }
-
-
         [RpcMethod("greet")]
         [TestingFilter("before action filter: 3 at Method")]
         [TestingFilter("before action filter: 4 at Method")]
@@ -27,9 +21,9 @@ namespace Server.RpcControllers
 
             try
             {
-                var data = new  {name = "amy"};
+                var data = new {name = "amy"};
 
-                RpcResponse reqTask = await RpcContext.Hub.RequestAsync("sayHi", data);
+                var reqTask = await RpcContext.Hub.RequestAsync("sayHi", data);
 
                 Console.WriteLine("Amy says Hi, got reply, he says " + reqTask.GetResult<string>());
             }
