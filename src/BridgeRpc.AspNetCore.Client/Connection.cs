@@ -61,6 +61,7 @@ namespace BridgeRpc.AspNetCore.Client
                                     hub.OnReservedRequest += HandlePing;
                                     pingTimer.Disposed += (sender, args) => hub.OnReservedRequest -= HandlePing;
                                     pingTimer.Enabled = true;
+#pragma warning disable 4014
                                     Task.Run(() =>
 #pragma warning restore 4014
                                     {
