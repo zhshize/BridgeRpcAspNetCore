@@ -69,7 +69,7 @@ namespace BridgeRpc.AspNetCore.Server.Extensions
                                     {
                                         await hub.RequestAsync(".ping", null, true, options.PongTimeout);
                                     }
-                                    catch (Exception e)
+                                    catch (Exception)
                                     {
                                         hub.Disconnect();
                                     }
