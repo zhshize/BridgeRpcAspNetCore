@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -97,7 +99,7 @@ namespace BridgeRpc.Core
             else if (obj is string str)
                 RawObject["result"] = str;
             else
-                RawObject["result"] = JObject.FromObject(obj);
+                RawObject["result"] = JToken.FromObject(obj);
         }
 
         /// <summary>
