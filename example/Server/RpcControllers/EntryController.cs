@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using BridgeRpc.AspNetCore.Router;
 using BridgeRpc.Core;
+using Client;
 
 namespace Server.RpcControllers
 {
@@ -13,9 +14,9 @@ namespace Server.RpcControllers
         [RpcMethod("greet")]
         [TestingFilter("before action filter: 3 at Method")]
         [TestingFilter("before action filter: 4 at Method")]
-        public async Task<string> Greet(RpcRequest request)
+        public async Task<string> Greet([RpcData] Dto request)
         {
-            var friend = request.GetData<string>();
+            var friend = request.Name;
 
             Console.WriteLine("Got greet from " + friend);
 

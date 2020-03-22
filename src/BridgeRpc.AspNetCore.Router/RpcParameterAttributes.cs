@@ -38,7 +38,7 @@ namespace BridgeRpc.AspNetCore.Router
         /// </summary>
         public RpcDataAttribute()
         {
-            TypeRequired = typeof(JToken);
+            TypeRequired = null;
         }
 
         /// <summary>
