@@ -6,6 +6,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\BridgeRpc.AspNetCore.Server\BridgeRpc.AspNetCore.Server.csproj" />
+      <ProjectReference Include="..\Client\Client.csproj" />
     </ItemGroup>
 
 </Project>

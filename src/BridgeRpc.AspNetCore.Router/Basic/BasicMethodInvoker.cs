@@ -93,8 +93,13 @@ namespace BridgeRpc.AspNetCore.Router.Basic
 
                 if (dataAttr != null)
                 {
-                    var data = request.GetType().GetMethod(nameof(request.GetData))
-                        ?.MakeGenericMethod(dataAttr.TypeRequired).Invoke(request, null);
+                    var data = request
+                        .GetType()
+                        .GetMethods()
+                        .Where(x => x.Name == nameof(request.GetData))
+                        .First(x => x.IsGenericMethod)?
+                        .MakeGenericMethod(dataAttr.TypeRequired == null ? p.ParameterType : dataAttr.TypeRequired)
+                        .Invoke(request, null);
                     args.Add(data);
                 }
                 else if (p.ParameterType == typeof(RpcRequest))

@@ -51,7 +51,7 @@ namespace Client
                         {
                             while (true)
                             {
-                                var r = await hub.RequestAsync("greet", "Joe");
+                                var r = await hub.RequestAsync("greet", new Dto {Name = "joe"});
                                 Console.WriteLine(r.GetResult<string>());
                                 await Task.Delay(5000);
                             }
