@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace BridgeRpc.Core.Util
 {
@@ -12,6 +13,17 @@ namespace BridgeRpc.Core.Util
             const string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
             return new string(Enumerable.Repeat(chars, length)
                 .Select(s => s[Random.Next(s.Length)]).ToArray());
+        }
+        
+        public static JToken ToJToken<T>(T obj)
+        {
+            if (obj == null)
+                return JValue.CreateNull();
+            if (obj is JToken token)
+                return token;
+            if (obj is string str)
+                return str;
+            return JToken.FromObject(obj);
         }
     }
 }
