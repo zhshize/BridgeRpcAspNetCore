@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -92,14 +90,7 @@ namespace BridgeRpc.Core
         /// <typeparam name="T">Type of responded data</typeparam>
         public void SetResult<T>(T obj)
         {
-            if (obj == null)
-                RawObject.Property("result").Value = JValue.CreateNull();
-            else if (obj is JToken token)
-                RawObject["result"] = token;
-            else if (obj is string str)
-                RawObject["result"] = str;
-            else
-                RawObject["result"] = JToken.FromObject(obj);
+            RawObject["result"] = Util.Util.ToJToken(obj);
         }
 
         /// <summary>
@@ -132,7 +123,7 @@ namespace BridgeRpc.Core
         /// <typeparam name="T">Type of data field</typeparam>
         public void SetError<T>(int code, string message, T data)
         {
-            var err = new JObject {{"code", code}, {"message", message}, {"data", JToken.FromObject(data)}};
+            var err = new JObject {{"code", code}, {"message", message}, {"data", Util.Util.ToJToken(data)}};
             RawObject["error"] = err;
             SyncErrorObject();
         }
