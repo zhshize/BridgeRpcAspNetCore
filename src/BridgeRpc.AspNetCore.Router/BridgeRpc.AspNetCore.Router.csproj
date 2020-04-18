@@ -3,9 +3,9 @@
     <PropertyGroup>
         <TargetFrameworks>netstandard2.1;netcoreapp3.1</TargetFrameworks>
         <LangVersion>7.3</LangVersion>
-        <PackageVersion>1.2.0</PackageVersion>
+        <PackageVersion>1.4.0</PackageVersion>
         <Authors>zhshize</Authors>
-        <Description>RPC framework based on WebSocket and MessagePack for ASP.net Core</Description>
+        <Description>JSON RPC framework based on WebSocket for ASP.net Core</Description>
         <Copyright>Copyright © 2019 by zhshize</Copyright>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageProjectUrl>https://github.com/zhshize/BridgeRpcAspNetCore</PackageProjectUrl>
@@ -28,6 +28,6 @@
     </ItemGroup>
     
     <ItemGroup>
-        <ProjectReference Include="../BridgeRpc.Core/BridgeRpc.Core.csproj" />
+        <PackageReference Include="BridgeRpc.Core" Version="1.4.0" />
     </ItemGroup>
 </Project>
