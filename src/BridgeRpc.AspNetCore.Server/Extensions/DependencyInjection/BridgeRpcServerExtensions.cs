@@ -38,7 +38,6 @@ namespace BridgeRpc.AspNetCore.Server.Extensions.DependencyInjection
 
             services.AddScoped<ISocket, BasicSocket>();
             services.AddScoped<GlobalFiltersList>();
-            services.AddScoped<IPipeline, Pipeline>();
             services.AddScoped<IRpcHub, RpcHub>();
             services.AddScoped<BasicRouter>();
             services.AddScoped<IMethodInvoker, BasicMethodInvoker>();

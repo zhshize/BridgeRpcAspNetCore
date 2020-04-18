@@ -37,9 +37,11 @@ namespace BridgeRpc.AspNetCore.Router.Basic
         /// <returns></returns>
         public RpcResponse Handle(RpcRequest request)
         {
+            var globalFilterList = _serviceProvider.GetService<GlobalFiltersList>();
             using (var scopedProvider = _serviceProvider.CreateScope())
             {
-                var pipeline = scopedProvider.ServiceProvider.GetService<IPipeline>();
+                var methodInvoker = scopedProvider.ServiceProvider.GetService<IMethodInvoker>();
+                var pipeline = new Pipeline.Pipeline(scopedProvider.ServiceProvider, globalFilterList, methodInvoker);
                 var methodProvider = scopedProvider.ServiceProvider.GetService<IRpcMethodProvider>();
 
                 // if http context is null, this side is client.
