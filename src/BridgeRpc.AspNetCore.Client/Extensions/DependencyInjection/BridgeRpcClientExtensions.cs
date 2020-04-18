@@ -27,7 +27,6 @@ namespace BridgeRpc.AspNetCore.Client.Extensions.DependencyInjection
             services.AddScoped(provider => o);
 
             services.AddScoped<GlobalFiltersList>();
-            services.AddScoped<IPipeline, Pipeline>();
             services.AddScoped<Connection>();
             services.AddScoped<ISocket, BasicSocket>(provider =>
                 (BasicSocket) provider.GetService<SocketProvider>().Socket);
