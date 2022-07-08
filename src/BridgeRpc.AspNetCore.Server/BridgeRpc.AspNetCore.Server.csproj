@@ -20,7 +20,7 @@
         <PackageReference Include="Microsoft.AspNetCore" Version="2.1.0" />
         <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.1.0" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.1.0" />
-        <PackageReference Include="Microsoft.AspNetCore.WebSockets" Version="2.2.0" />
+        <PackageReference Include="Microsoft.AspNetCore.WebSockets" Version="2.2.1" />
         
     </ItemGroup>
     
